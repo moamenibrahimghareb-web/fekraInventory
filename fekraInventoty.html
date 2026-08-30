@@ -1,0 +1,1655 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>جرد المحل - نظام الجرد السحابي</title>
+    
+    <meta name="theme-color" content="#047857">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="جرد المحل">
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Cairo', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white !important; color: black !important; padding: 0 !important; }
+            .print-container { box-shadow: none !important; border: none !important; width: 100% !important; max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
+            table { font-size: 10pt !important; }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col antialiased selection:bg-emerald-500 selection:text-white pb-12">
+
+    <!-- Header -->
+    <header class="bg-emerald-700 text-white shadow-md sticky top-0 z-30 no-print">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3 space-x-reverse">
+                    <div class="bg-emerald-800 p-2 rounded-xl text-2xl shadow-inner">📦</div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h1 class="text-xl sm:text-2xl font-black tracking-tight leading-tight">جرد المحل</h1>
+                            <span id="cloud-status-badge" class="bg-emerald-800/90 text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-500/60 text-emerald-200 flex items-center gap-1.5 shadow-sm">
+                                <span id="cloud-status-dot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                                <span id="cloud-status-text">متصل سحابياً</span>
+                            </span>
+                        </div>
+                        <p class="text-xs text-emerald-100 opacity-90 font-medium">مزامنة سحابية لحظية</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <button onclick="fetchOnlineData(true)" id="quick-sync-btn" title="تحديث البيانات" class="bg-emerald-800 hover:bg-emerald-900 border border-emerald-500/60 text-white px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+                        <span id="sync-spin-icon">🔄</span>
+                        <span class="hidden sm:inline">مزامنة الآن</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Steps Nav -->
+            <div class="flex items-center gap-1 bg-emerald-800/80 p-1.5 rounded-xl text-xs font-bold text-white border border-emerald-600/50 overflow-x-auto no-scrollbar">
+                <button id="step-btn-1" onclick="switchStep(1)" class="px-3 py-1.5 rounded-lg transition-all duration-200 bg-emerald-500 shadow text-white flex items-center gap-1 whitespace-nowrap font-black">
+                    <span>1.</span> <span>العد والحصر</span>
+                </button>
+                <button id="step-btn-2" onclick="switchStep(2)" class="px-3 py-1.5 rounded-lg transition-all duration-200 text-emerald-200 hover:text-white flex items-center gap-1 whitespace-nowrap">
+                    <span>2.</span> <span>تأكيد الأسعار</span>
+                </button>
+                <button id="step-btn-3" onclick="switchStep(3)" class="px-3 py-1.5 rounded-lg transition-all duration-200 text-emerald-200 hover:text-white flex items-center gap-1 whitespace-nowrap">
+                    <span>3.</span> <span>التقرير الفعلي</span>
+                </button>
+                <button id="step-btn-4" onclick="switchStep(4)" class="px-3 py-1.5 rounded-lg transition-all duration-200 text-emerald-200 hover:text-white flex items-center gap-1.5 whitespace-nowrap">
+                    <span>4.</span> <span>مقارنة السيستم</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl w-full mx-auto px-4 mt-5 flex-1">
+
+        <!-- Toast Notifications -->
+        <div id="toast-box" class="fixed bottom-6 right-6 left-6 sm:left-auto sm:w-96 z-50 transform translate-y-32 opacity-0 transition-all duration-300 pointer-events-none">
+            <div id="toast-inner" class="bg-slate-900 text-white p-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-slate-700">
+                <div id="toast-icon" class="text-2xl">ℹ️</div>
+                <div id="toast-message" class="text-sm font-semibold flex-1"></div>
+            </div>
+        </div>
+
+        <!-- Confirm Modal -->
+        <div id="modal-container" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+            <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl text-center border border-slate-200">
+                <div id="modal-icon" class="text-4xl mb-3">⚠️</div>
+                <h3 id="modal-title" class="text-lg font-bold text-slate-800 mb-2">تأكيد الإجراء</h3>
+                <p id="modal-desc" class="text-slate-600 text-sm mb-6">هل أنت متأكد من رغبتك في تنفيذ هذا الإجراء؟</p>
+                <div class="flex gap-3">
+                    <button id="modal-confirm-btn" class="flex-1 py-3 bg-rose-600 hover:bg-rose-700 active:scale-95 text-white font-bold rounded-xl transition shadow-lg shadow-rose-600/20">نعم، تأكيد</button>
+                    <button id="modal-cancel-btn" onclick="closeModal()" class="flex-1 py-3 bg-slate-200 hover:bg-slate-300 active:scale-95 text-slate-700 font-bold rounded-xl transition">إلغاء</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Excel / File Mapping Modal -->
+        <div id="mapping-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+            <div class="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-7 shadow-2xl border border-slate-200">
+                <div class="flex items-center gap-3 mb-4 pb-3 border-b border-slate-100">
+                    <div class="bg-indigo-100 text-indigo-700 p-2.5 rounded-2xl text-xl">📊</div>
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-800">تحديد أعمدة ملف السيستم</h3>
+                        <p class="text-xs text-slate-500">اختر الأعمدة لرفعها إلى قاعدة البيانات السحابية</p>
+                    </div>
+                </div>
+
+                <div class="space-y-4 mb-6">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5" for="map-name-col">عمود اسم الصنف <span class="text-rose-500">*</span></label>
+                        <select id="map-name-col" class="w-full text-sm font-semibold p-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500"></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5" for="map-qty-col">عمود كمية السيستم (الرصيد) <span class="text-rose-500">*</span></label>
+                        <select id="map-qty-col" class="w-full text-sm font-semibold p-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500"></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5" for="map-price-col">عمود السعر</label>
+                        <select id="map-price-col" class="w-full text-sm font-semibold p-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500"></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5" for="map-barcode-col">عمود الباركود</label>
+                        <select id="map-barcode-col" class="w-full text-sm font-semibold p-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500"></select>
+                    </div>
+                </div>
+
+                <div class="flex gap-3">
+                    <button onclick="applyColumnMapping()" class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/20 transition">تأكيد ورفع للسحابة</button>
+                    <button onclick="cancelColumnMapping()" class="px-5 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition">إلغاء</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCREEN 1: COUNTING -->
+        <div id="screen-1" class="space-y-5">
+            <div class="bg-white rounded-3xl p-4 sm:p-5 shadow-sm border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-3.5">
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-100 text-emerald-700 flex items-center justify-center text-2xl shrink-0">
+                        🌐
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 class="font-bold text-slate-800 text-sm sm:text-base">قاعدة أصناف وأسعار السيستم</h3>
+                            <span id="system-file-status" class="text-[11px] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200">
+                                0 صنف
+                            </span>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-0.5">مخزنة سحابياً ومتاحة لجميع الأجهزة تلقائياً.</p>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto shrink-0">
+                    <input type="file" id="system-file-input" accept=".csv, .xlsx, .xls" class="hidden" onchange="handleSystemFileUpload(event)">
+                    <button type="button" onclick="document.getElementById('system-file-input').click()"
+                        class="flex-1 sm:flex-none px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold rounded-xl transition flex items-center justify-center gap-2 shadow-md shadow-emerald-600/20">
+                        <span>📤</span>
+                        <span>رفع ملف السيستم (Excel/CSV)</span>
+                    </button>
+                    <button id="clear-system-btn" type="button" onclick="confirmClearSystemData()" class="hidden px-3 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-xl text-xs font-bold transition" title="حذف بيانات السيستم السحابية">
+                        ✕
+                    </button>
+                </div>
+            </div>
+
+            <!-- Item Input Box -->
+            <div class="bg-white rounded-3xl p-5 sm:p-7 shadow-sm border border-slate-200/80">
+                <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+                    <h2 class="text-base sm:text-lg font-bold text-slate-800 flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        إدخال الصنف الحالي
+                    </h2>
+                    <span id="current-mode-badge" class="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
+                        صنف جديد
+                    </span>
+                </div>
+
+                <div class="mb-4 relative">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="block text-sm font-bold text-slate-700" for="product-name-input">
+                            اسم الصنف أو الباركود
+                        </label>
+                        <span id="matched-system-badge" class="text-xs text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-lg font-bold hidden"></span>
+                    </div>
+
+                    <div class="relative">
+                        <input type="text" id="product-name-input" autocomplete="off" placeholder="اكتب اسم الصنف أو امسح الباركود..."
+                            class="w-full text-lg sm:text-xl font-bold px-4 py-3.5 bg-slate-50 border-2 border-slate-200 rounded-2xl focus:border-emerald-500 focus:bg-white focus:outline-none transition-all placeholder:font-normal placeholder:text-slate-400">
+                        <button type="button" id="clear-name-btn" onclick="clearCurrentProductName()" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 hidden">
+                            ✕
+                        </button>
+                    </div>
+
+                    <div id="autocomplete-list" class="absolute z-40 right-0 left-0 mt-1 bg-white border-2 border-indigo-100 rounded-2xl shadow-2xl max-h-64 overflow-y-auto hidden divide-y divide-slate-100"></div>
+                </div>
+
+                <div class="mb-5 bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-200/70">
+                    <label class="block text-sm font-bold text-slate-700 mb-1.5" for="quantity-input">أدخل الكمية التي وجدتها</label>
+                    <div class="flex gap-2 sm:gap-3">
+                        <input type="number" step="any" min="0.01" id="quantity-input" placeholder="مثلاً: 5"
+                            class="w-full text-2xl sm:text-3xl font-black text-center px-4 py-3 bg-white border-2 border-slate-300 rounded-2xl focus:border-emerald-600 focus:ring-4 focus:ring-emerald-500/10 focus:outline-none transition-all shadow-inner text-emerald-800">
+                        <button type="button" id="add-qty-btn" onclick="addCurrentQuantity()"
+                            class="px-6 sm:px-8 py-3 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-lg font-black rounded-2xl shadow-lg shadow-emerald-600/25 transition-all flex items-center justify-center shrink-0">
+                            + إضافة
+                        </button>
+                    </div>
+                    <div class="mt-2 text-xs text-slate-500 flex items-center justify-between">
+                        <span>💡 اضغط <b>Enter</b> بعد إدخال الرقم للإضافة الفورية</span>
+                        <span class="hidden sm:inline">يدعم الأعداد والكسور</span>
+                    </div>
+                </div>
+
+                <div id="current-summary-box" class="bg-emerald-50/80 border-2 border-dashed border-emerald-300 rounded-2xl p-4 transition-all">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div class="flex-1">
+                            <span class="text-xs font-semibold text-emerald-800 block mb-1">الكميات المسجلة للصنف الحالي:</span>
+                            <div id="current-qty-tags" class="flex flex-wrap items-center gap-1.5 min-h-[34px]">
+                                <span class="text-xs text-slate-400 italic">لم يتم إدخال كميات بعد...</span>
+                            </div>
+                        </div>
+                        <div class="text-left sm:border-r sm:pr-6 sm:border-emerald-200">
+                            <div class="text-xs font-bold text-slate-500">إجمالي كمية الصنف</div>
+                            <div class="text-3xl font-black text-emerald-700 tracking-tight" id="current-total-display">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-5 flex gap-3">
+                    <button type="button" id="save-product-btn" onclick="saveActiveProduct()"
+                        class="flex-1 py-4 bg-slate-900 hover:bg-slate-800 active:scale-[0.99] text-white text-lg font-extrabold rounded-2xl shadow-xl shadow-slate-900/15 transition-all flex items-center justify-center gap-2">
+                        <span>💾</span>
+                        <span>حفظ الصنف سحابياً</span>
+                    </button>
+                    <button type="button" id="cancel-edit-btn" onclick="cancelEditingProduct()" class="hidden px-5 py-4 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-2xl transition">
+                        إلغاء التعديل
+                    </button>
+                </div>
+            </div>
+
+            <!-- Counted List -->
+            <div class="bg-white rounded-3xl p-5 sm:p-7 shadow-sm border border-slate-200/80">
+                <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+                    <div class="flex items-center gap-2">
+                        <h3 class="text-lg font-bold text-slate-800">الأصناف المجرودة أونلاين</h3>
+                        <span id="items-badge-count" class="bg-slate-100 text-slate-700 font-black text-xs px-2.5 py-1 rounded-full border border-slate-200">0 صنف</span>
+                    </div>
+                    <div class="w-44 sm:w-60">
+                        <input type="text" id="search-saved-input" oninput="renderSavedList()" placeholder="🔍 بحث في المجرود..."
+                            class="w-full text-xs font-medium px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500">
+                    </div>
+                </div>
+
+                <div id="saved-products-list" class="space-y-2.5 max-h-[420px] overflow-y-auto pr-1"></div>
+
+                <div id="empty-state-1" class="text-center py-12 px-4">
+                    <div class="text-5xl mb-3 text-slate-300">📋</div>
+                    <p class="text-slate-600 font-bold text-base">لم يتم تسجيل أصناف بعد</p>
+                    <p class="text-slate-400 text-xs mt-1">ابدأ بإدخال الأصناف بالأعلى وسيتم حفظها ومزامنتها لحظياً</p>
+                </div>
+
+                <div class="mt-6 pt-5 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div class="flex items-center gap-6 w-full sm:w-auto justify-around sm:justify-start bg-slate-50 sm:bg-transparent p-3 sm:p-0 rounded-2xl border sm:border-0 border-slate-200">
+                        <div>
+                            <span class="text-xs font-semibold text-slate-500 block">عدد الأصناف:</span>
+                            <span id="stat-total-items" class="text-xl font-black text-slate-800">0</span>
+                        </div>
+                        <div class="w-px h-8 bg-slate-200 sm:block"></div>
+                        <div>
+                            <span class="text-xs font-semibold text-slate-500 block">إجمالي القطع:</span>
+                            <span id="stat-total-units" class="text-xl font-black text-emerald-700">0</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2 w-full sm:w-auto">
+                        <button type="button" onclick="switchStep(2)" id="go-to-pricing-btn"
+                            class="flex-1 sm:flex-none px-6 py-3.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold rounded-2xl shadow-lg shadow-emerald-600/20 transition flex items-center justify-center gap-2">
+                            <span>مراجعة الأسعار</span>
+                            <span class="text-xl">←</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCREEN 2: PRICING -->
+        <div id="screen-2" class="space-y-6 hidden">
+            <div class="bg-white rounded-3xl p-5 sm:p-7 shadow-sm border border-slate-200/80">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 mb-4 border-b border-slate-100">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-800">تسعير الأصناف المجرودة</h2>
+                        <p class="text-xs text-slate-500 mt-0.5">تعديل أي سعر يُحفظ سحابياً فوراً</p>
+                    </div>
+                    <div class="bg-emerald-50 border border-emerald-200 rounded-2xl px-4 py-2.5 text-left shrink-0">
+                        <span class="text-xs font-bold text-slate-500 block">إجمالي قيمة الجرد:</span>
+                        <span id="price-step-grand-total" class="text-2xl font-black text-emerald-700">0.00</span>
+                        <span class="text-xs font-bold text-emerald-700">ج.م / ر.س</span>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-right border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-600 text-xs font-bold uppercase border-y border-slate-200">
+                                <th class="py-3.5 px-3">#</th>
+                                <th class="py-3.5 px-3">اسم الصنف</th>
+                                <th class="py-3.5 px-3 text-center">الكمية الفعلية</th>
+                                <th class="py-3.5 px-3 w-40 text-center">سعر الوحدة</th>
+                                <th class="py-3.5 px-3 text-left">قيمة الجرد</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pricing-table-body" class="divide-y divide-slate-100 text-sm"></tbody>
+                    </table>
+                </div>
+
+                <div class="mt-6 pt-5 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+                    <button type="button" onclick="switchStep(1)" class="w-full sm:w-auto px-5 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-2xl transition">
+                        → العودة لشاشة العد
+                    </button>
+                    <div class="flex items-center gap-2 w-full sm:w-auto">
+                        <button type="button" onclick="switchStep(3)" class="flex-1 sm:flex-none px-6 py-3.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold rounded-2xl shadow-lg shadow-emerald-600/20 transition flex items-center justify-center gap-2">
+                            <span>تقرير الجرد الفعلي</span>
+                            <span>←</span>
+                        </button>
+                        <button type="button" onclick="switchStep(4)" class="flex-1 sm:flex-none px-6 py-3.5 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-bold rounded-2xl shadow-lg shadow-indigo-600/20 transition flex items-center justify-center gap-2">
+                            <span>مقارنة السيستم</span>
+                            <span>📊</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCREEN 3: REPORT -->
+        <div id="screen-3" class="space-y-6 hidden">
+            <div class="bg-white rounded-3xl p-4 sm:p-5 shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-3 no-print">
+                <div class="flex items-center gap-2">
+                    <button onclick="switchStep(1)" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm font-bold rounded-xl transition">
+                        ✏️ تعديل الجرد
+                    </button>
+                    <button onclick="switchStep(2)" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm font-bold rounded-xl transition">
+                        💲 تعديل الأسعار
+                    </button>
+                    <button onclick="switchStep(4)" class="px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs sm:text-sm font-bold rounded-xl transition">
+                        📊 مقارنة السيستم
+                    </button>
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                    <button onclick="exportToCSV()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold rounded-xl shadow transition flex items-center gap-1.5">
+                        <span>📥</span>
+                        <span>تصدير CSV</span>
+                    </button>
+                    <button onclick="window.print()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-bold rounded-xl shadow transition flex items-center gap-1.5">
+                        <span>🖨️</span>
+                        <span>طباعة</span>
+                    </button>
+                    <button onclick="confirmResetInventory()" class="px-3.5 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs sm:text-sm font-bold rounded-xl transition">
+                        🗑️ جرد جديد (تصفير سحابي)
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-3xl p-6 sm:p-10 shadow-sm border border-slate-200 print-container">
+                <div class="border-b-2 border-slate-800 pb-6 mb-6 flex flex-col sm:flex-row justify-between sm:items-end gap-4">
+                    <div>
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="text-3xl">🏬</span>
+                            <h2 class="text-2xl font-black text-slate-900">تقرير الجرد الفعلي للمحل</h2>
+                        </div>
+                        <p class="text-xs text-slate-500">تم إنشاء هذا التقرير سحابياً</p>
+                    </div>
+                    <div class="text-right sm:text-left text-xs text-slate-600 space-y-1">
+                        <div><b>تاريخ التقرير:</b> <span id="report-date-time">-</span></div>
+                        <div><b>الحالة:</b> <span class="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded">معتمد أونلاين</span></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 text-center">
+                        <span class="text-xs font-bold text-slate-500 block mb-1">عدد الأصناف المجرودة</span>
+                        <span id="rep-kpi-items" class="text-2xl font-black text-slate-800">0</span>
+                    </div>
+                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 text-center">
+                        <span class="text-xs font-bold text-slate-500 block mb-1">إجمالي القطع المجرودة</span>
+                        <span id="rep-kpi-units" class="text-2xl font-black text-slate-800">0</span>
+                    </div>
+                    <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-200 text-center">
+                        <span class="text-xs font-bold text-emerald-800 block mb-1">إجمالي القيمة المالية</span>
+                        <span id="rep-kpi-value" class="text-2xl font-black text-emerald-700">0.00</span>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-right border-collapse">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-700 text-xs font-bold border-b-2 border-slate-300">
+                                <th class="py-3 px-3">#</th>
+                                <th class="py-3 px-3">اسم الصنف</th>
+                                <th class="py-3 px-3">الأعداد المدخلة (الحصر)</th>
+                                <th class="py-3 px-3 text-center">إجمالي الكمية</th>
+                                <th class="py-3 px-3 text-center">سعر الوحدة</th>
+                                <th class="py-3 px-3 text-left">قيمة الجرد</th>
+                            </tr>
+                        </thead>
+                        <tbody id="report-table-body" class="divide-y divide-slate-200 text-sm"></tbody>
+                        <tfoot>
+                            <tr class="bg-slate-100 font-black text-slate-900 border-t-2 border-slate-300">
+                                <td colspan="3" class="py-4 px-3 text-base">الإجمالي العام</td>
+                                <td id="report-foot-units" class="py-4 px-3 text-center text-base">0</td>
+                                <td class="py-4 px-3 text-center">-</td>
+                                <td id="report-foot-total-val" class="py-4 px-3 text-left text-base text-emerald-700">0.00</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCREEN 4: SYSTEM COMPARISON -->
+        <div id="screen-4" class="space-y-6 hidden">
+            <div class="bg-white rounded-3xl p-5 sm:p-7 shadow-sm border border-slate-200">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-100">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-2xl">⚖️</span>
+                            <h2 class="text-xl font-black text-slate-800">مقارنة الجرد الفعلي مع السيستم</h2>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-0.5">مطابقة كميات الحصر الفعلي مع رصيد السيستم وحساب الفروقات</p>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button onclick="exportComparisonCSV()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold rounded-xl shadow transition flex items-center gap-1.5">
+                            <span>📥</span>
+                            <span>تصدير المقارنة (CSV)</span>
+                        </button>
+                        <button onclick="window.print()" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-bold rounded-xl shadow transition flex items-center gap-1.5">
+                            <span>🖨️</span>
+                            <span>طباعة المقارنة</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="my-5 p-4 bg-indigo-50/70 border-2 border-indigo-200 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <span class="text-xs font-bold text-indigo-900 block mb-0.5">🎯 نطاق المقارنة:</span>
+                        <p id="scope-description-text" class="text-xs text-indigo-700">مقارنة <b>الأصناف المجرودة فقط</b> (جرد جزئي دوري دون اعتبار باقي المخزن عجزاً).</p>
+                    </div>
+                    
+                    <div class="flex items-center bg-white p-1 rounded-xl shadow-xs border border-indigo-200 shrink-0">
+                        <button onclick="setComparisonScope('partial')" id="scope-btn-partial"
+                            class="px-4 py-2 rounded-lg text-xs font-black bg-indigo-600 text-white shadow transition flex items-center gap-1.5">
+                            <span>⚡</span>
+                            <span>جرد جزئي (المجرود فقط)</span>
+                        </button>
+                        <button onclick="setComparisonScope('full')" id="scope-btn-full"
+                            class="px-4 py-2 rounded-lg text-xs font-bold text-slate-600 hover:text-indigo-900 transition flex items-center gap-1.5">
+                            <span>🌐</span>
+                            <span>جرد كلي (شامل المحل)</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-4 my-6">
+                    <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 text-center">
+                        <span class="text-[11px] font-bold text-slate-500 block mb-1">قيمة الجرد الفعلي</span>
+                        <span id="comp-kpi-actual-val" class="text-base sm:text-lg font-black text-slate-800">0.00</span>
+                    </div>
+                    <div class="bg-indigo-50/70 p-3.5 rounded-2xl border border-indigo-200 text-center">
+                        <span class="text-[11px] font-bold text-indigo-700 block mb-1">قيمة مخزون السيستم</span>
+                        <span id="comp-kpi-system-val" class="text-base sm:text-lg font-black text-indigo-900">0.00</span>
+                    </div>
+                    <div class="bg-rose-50 p-3.5 rounded-2xl border border-rose-200 text-center">
+                        <span class="text-[11px] font-bold text-rose-700 block mb-1">إجمالي العجز</span>
+                        <span id="comp-kpi-shortage-val" class="text-base sm:text-lg font-black text-rose-700">0.00</span>
+                    </div>
+                    <div class="bg-teal-50 p-3.5 rounded-2xl border border-teal-200 text-center">
+                        <span class="text-[11px] font-bold text-teal-700 block mb-1">إجمالي الزيادة</span>
+                        <span id="comp-kpi-surplus-val" class="text-base sm:text-lg font-black text-teal-700">0.00</span>
+                    </div>
+                    <div class="col-span-2 sm:col-span-1 bg-slate-900 text-white p-3.5 rounded-2xl text-center shadow-md">
+                        <span class="text-[11px] font-bold text-slate-300 block mb-1">صافي الفرق بالقيمة</span>
+                        <span id="comp-kpi-net-diff" class="text-base sm:text-lg font-black">0.00</span>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-3 border-t border-slate-100 no-print">
+                    <div class="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-2xl text-xs font-bold overflow-x-auto">
+                        <button onclick="setComparisonFilter('all')" id="comp-filter-all" class="px-3 py-1.5 rounded-xl bg-white shadow-xs text-slate-800 transition">
+                            الكل (<span id="count-comp-all">0</span>)
+                        </button>
+                        <button onclick="setComparisonFilter('shortage')" id="comp-filter-shortage" class="px-3 py-1.5 rounded-xl text-rose-700 hover:bg-rose-50 transition">
+                            عجز (<span id="count-comp-shortage">0</span>)
+                        </button>
+                        <button onclick="setComparisonFilter('surplus')" id="comp-filter-surplus" class="px-3 py-1.5 rounded-xl text-teal-700 hover:bg-teal-50 transition">
+                            زيادة (<span id="count-comp-surplus">0</span>)
+                        </button>
+                        <button onclick="setComparisonFilter('matched')" id="comp-filter-matched" class="px-3 py-1.5 rounded-xl text-slate-600 hover:bg-slate-200 transition">
+                            متطابق (<span id="count-comp-matched">0</span>)
+                        </button>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2">
+                        <select id="comp-category-select" onchange="renderComparisonTable()" class="text-xs font-bold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-indigo-500 hidden">
+                            <option value="all">كل التصنيفات</option>
+                        </select>
+                        <select id="comp-sort-select" onchange="renderComparisonTable()" class="text-xs font-bold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-indigo-500">
+                            <option value="shortage-desc">⚠️ أكبر عجز بالقيمة</option>
+                            <option value="surplus-desc">📈 أكبر زيادة بالقيمة</option>
+                            <option value="name-asc">🔤 أبجدياً حسب اسم الصنف</option>
+                            <option value="diff-qty-desc">🔢 أكبر فرق بالكمية</option>
+                        </select>
+                        <input type="text" id="comp-search-input" oninput="renderComparisonTable()" placeholder="🔍 بحث في المقارنة..."
+                            class="text-xs font-medium px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-indigo-500 w-36 sm:w-44">
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto mt-4">
+                    <table class="w-full text-right border-collapse print:text-xs">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-700 text-xs font-bold border-b-2 border-slate-200">
+                                <th class="py-3 px-3">#</th>
+                                <th class="py-3 px-3">اسم الصنف</th>
+                                <th class="py-3 px-3 text-center">كمية السيستم</th>
+                                <th class="py-3 px-3 text-center">الجرد الفعلي</th>
+                                <th class="py-3 px-3 text-center">فرق الكمية</th>
+                                <th class="py-3 px-3 text-center">سعر الوحدة</th>
+                                <th class="py-3 px-3 text-left">قيمة الفرق</th>
+                                <th class="py-3 px-3 text-center no-print">الحالة</th>
+                            </tr>
+                        </thead>
+                        <tbody id="comparison-table-body" class="divide-y divide-slate-100 text-sm"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // Supabase Embedded Production Configuration
+        const SUPABASE_URL = 'https://ovqqprpbxhibtennbvbc.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92cXFwcnBieGhpYnRlbm5idmJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxMTAwODYsImV4cCI6MjEwMzY4NjA4Nn0.Z7-bihMmW37uexcxX7PdtOs4B8EbfD8oWcV9aMQzGhw';
+
+        let supabaseClient = null;
+        let products = [];
+        let systemItems = [];
+        let currentEditingIndex = null;
+        let activeQuantities = [];
+        let currentStep = 1;
+        let comparisonFilter = 'all';
+        let comparisonScope = 'partial';
+
+        let pendingRawData = [];
+        let detectedHeaders = [];
+
+        const dom = {
+            productName: document.getElementById('product-name-input'),
+            autocompleteList: document.getElementById('autocomplete-list'),
+            matchedSystemBadge: document.getElementById('matched-system-badge'),
+            clearNameBtn: document.getElementById('clear-name-btn'),
+            quantityInput: document.getElementById('quantity-input'),
+            addQtyBtn: document.getElementById('add-qty-btn'),
+            currentQtyTags: document.getElementById('current-qty-tags'),
+            currentTotalDisplay: document.getElementById('current-total-display'),
+            saveProductBtn: document.getElementById('save-product-btn'),
+            cancelEditBtn: document.getElementById('cancel-edit-btn'),
+            currentModeBadge: document.getElementById('current-mode-badge'),
+            savedProductsList: document.getElementById('saved-products-list'),
+            emptyState1: document.getElementById('empty-state-1'),
+            searchSavedInput: document.getElementById('search-saved-input'),
+            itemsBadgeCount: document.getElementById('items-badge-count'),
+            statTotalItems: document.getElementById('stat-total-items'),
+            statTotalUnits: document.getElementById('stat-total-units'),
+            pricingTableBody: document.getElementById('pricing-table-body'),
+            pricingGrandTotal: document.getElementById('price-step-grand-total'),
+            reportDateTime: document.getElementById('report-date-time'),
+            repKpiItems: document.getElementById('rep-kpi-items'),
+            repKpiUnits: document.getElementById('rep-kpi-units'),
+            repKpiValue: document.getElementById('rep-kpi-value'),
+            reportTableBody: document.getElementById('report-table-body'),
+            reportFootUnits: document.getElementById('report-foot-units'),
+            reportFootTotalVal: document.getElementById('report-foot-total-val'),
+            compKpiActualVal: document.getElementById('comp-kpi-actual-val'),
+            compKpiSystemVal: document.getElementById('comp-kpi-system-val'),
+            compKpiShortageVal: document.getElementById('comp-kpi-shortage-val'),
+            compKpiSurplusVal: document.getElementById('comp-kpi-surplus-val'),
+            compKpiNetDiff: document.getElementById('comp-kpi-net-diff'),
+            comparisonTableBody: document.getElementById('comparison-table-body'),
+            compSortSelect: document.getElementById('comp-sort-select'),
+            compSearchInput: document.getElementById('comp-search-input'),
+            compCategorySelect: document.getElementById('comp-category-select'),
+            systemFileStatus: document.getElementById('system-file-status'),
+            clearSystemBtn: document.getElementById('clear-system-btn'),
+            scopeBtnPartial: document.getElementById('scope-btn-partial'),
+            scopeBtnFull: document.getElementById('scope-btn-full'),
+            scopeDescriptionText: document.getElementById('scope-description-text'),
+            syncSpinIcon: document.getElementById('sync-spin-icon'),
+            mapNameCol: document.getElementById('map-name-col'),
+            mapQtyCol: document.getElementById('map-qty-col'),
+            mapPriceCol: document.getElementById('map-price-col'),
+            mapBarcodeCol: document.getElementById('map-barcode-col'),
+            mappingModal: document.getElementById('mapping-modal'),
+            countCompAll: document.getElementById('count-comp-all'),
+            countCompShortage: document.getElementById('count-comp-shortage'),
+            countCompSurplus: document.getElementById('count-comp-surplus'),
+            countCompMatched: document.getElementById('count-comp-matched'),
+            stepBtn1: document.getElementById('step-btn-1'),
+            stepBtn2: document.getElementById('step-btn-2'),
+            stepBtn3: document.getElementById('step-btn-3'),
+            stepBtn4: document.getElementById('step-btn-4'),
+            screen1: document.getElementById('screen-1'),
+            screen2: document.getElementById('screen-2'),
+            screen3: document.getElementById('screen-3'),
+            screen4: document.getElementById('screen-4'),
+            modalContainer: document.getElementById('modal-container'),
+            modalConfirmBtn: document.getElementById('modal-confirm-btn'),
+            modalTitle: document.getElementById('modal-title'),
+            modalDesc: document.getElementById('modal-desc'),
+            toastBox: document.getElementById('toast-box'),
+            toastMessage: document.getElementById('toast-message'),
+            toastIcon: document.getElementById('toast-icon')
+        };
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            initSupabase();
+            setComparisonScope(comparisonScope, false);
+            setupEventListeners();
+            await fetchOnlineData();
+            setupRealtimeSubscriptions();
+            dom.productName.focus();
+        });
+
+        function initSupabase() {
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
+
+        function setupRealtimeSubscriptions() {
+            if (!supabaseClient) return;
+            supabaseClient
+                .channel('public:inventory_products')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'inventory_products' }, () => {
+                    fetchOnlineData(false);
+                })
+                .subscribe();
+
+            supabaseClient
+                .channel('public:system_items')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'system_items' }, () => {
+                    fetchOnlineData(false);
+                })
+                .subscribe();
+        }
+
+        async function fetchOnlineData(showFeedback = false) {
+            if (!supabaseClient) return;
+            dom.syncSpinIcon.classList.add('animate-spin');
+
+            try {
+                const { data: invData, error: invErr } = await supabaseClient
+                    .from('inventory_products')
+                    .select('*')
+                    .order('id', { ascending: true });
+
+                if (invErr) throw invErr;
+
+                products = (invData || []).map(row => ({
+                    id: row.id,
+                    name: row.name,
+                    quantities: Array.isArray(row.quantities) ? row.quantities : [],
+                    totalQuantity: parseFloat(row.total_quantity) || 0,
+                    unitPrice: parseFloat(row.unit_price) || 0,
+                    barcode: row.barcode || ''
+                }));
+
+                const { data: sysData, error: sysErr } = await supabaseClient
+                    .from('system_items')
+                    .select('*');
+
+                if (sysErr) throw sysErr;
+
+                systemItems = (sysData || []).map(row => ({
+                    id: row.id,
+                    name: row.name,
+                    normalizedName: row.normalized_name,
+                    systemQty: parseFloat(row.system_qty) || 0,
+                    unitPrice: parseFloat(row.unit_price) || 0,
+                    barcode: row.barcode || '',
+                    category: row.category || ''
+                }));
+
+                renderSavedList();
+                updateSystemFileHeaderStatus();
+                populateCategoryFilter();
+                updateCurrentProductAccumulator();
+
+                if (currentStep === 2) renderPricingScreen();
+                if (currentStep === 3) renderReportScreen();
+                if (currentStep === 4) renderComparisonTable();
+
+                if (showFeedback) showToast("تم تحديث البيانات سحابياً", "☁️");
+            } catch (err) {
+                showToast(`خطأ مزامنة: ${err.message}`, "❌");
+            } finally {
+                dom.syncSpinIcon.classList.remove('animate-spin');
+            }
+        }
+
+        function setupEventListeners() {
+            dom.quantityInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addCurrentQuantity();
+                }
+            });
+
+            dom.productName.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const val = dom.productName.value.trim();
+                    if (!val) return;
+                    const matched = findMatchingSystemItem(val);
+                    if (matched) {
+                        applySelectedSystemItem(matched);
+                    } else {
+                        hideAutocomplete();
+                        dom.quantityInput.focus();
+                        dom.quantityInput.select();
+                    }
+                } else if (e.key === 'Escape') {
+                    hideAutocomplete();
+                }
+            });
+
+            dom.productName.addEventListener('input', () => {
+                const val = dom.productName.value.trim();
+                dom.clearNameBtn.classList.toggle('hidden', !val);
+                if (val.length >= 1) {
+                    showAutocompleteSuggestions(val);
+                    checkAndShowLiveBadge(val);
+                } else {
+                    hideAutocomplete();
+                    dom.matchedSystemBadge.classList.add('hidden');
+                }
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!dom.productName.contains(e.target) && !dom.autocompleteList.contains(e.target)) {
+                    hideAutocomplete();
+                }
+            });
+        }
+
+        function findMatchingSystemItem(term) {
+            if (systemItems.length === 0) return null;
+            const clean = term.trim();
+            const norm = normalizeName(clean);
+            const byBarcode = systemItems.find(s => s.barcode && String(s.barcode).trim() === clean);
+            if (byBarcode) return byBarcode;
+            const byName = systemItems.find(s => s.normalizedName === norm);
+            if (byName) return byName;
+            return null;
+        }
+
+        function checkAndShowLiveBadge(term) {
+            const matched = findMatchingSystemItem(term);
+            if (matched) {
+                dom.matchedSystemBadge.innerHTML = `📍 السيستم: <b>${formatNumber(matched.systemQty)}</b> ق | السعر: <b>${formatCurrency(matched.unitPrice)}</b>`;
+                dom.matchedSystemBadge.classList.remove('hidden');
+            } else {
+                dom.matchedSystemBadge.classList.add('hidden');
+            }
+        }
+
+        function showAutocompleteSuggestions(query) {
+            if (systemItems.length === 0) {
+                hideAutocomplete();
+                return;
+            }
+            const cleanQ = query.toLowerCase().trim();
+            const normQ = normalizeName(cleanQ);
+            const matches = systemItems.filter(item => {
+                const nameMatch = item.normalizedName.includes(normQ) || item.name.toLowerCase().includes(cleanQ);
+                const barcodeMatch = item.barcode && String(item.barcode).toLowerCase().includes(cleanQ);
+                return nameMatch || barcodeMatch;
+            }).slice(0, 15);
+
+            if (matches.length === 0) {
+                hideAutocomplete();
+                return;
+            }
+
+            let html = '';
+            matches.forEach((item) => {
+                html += `
+                    <div onclick="selectAutocompleteItem('${escapeHtml(item.name)}')"
+                         class="p-3 hover:bg-emerald-50 cursor-pointer transition flex items-center justify-between gap-3 text-right">
+                        <div class="flex-1 min-w-0">
+                            <div class="font-bold text-slate-800 text-sm truncate">${escapeHtml(item.name)}</div>
+                            <div class="text-[11px] text-slate-400 flex items-center gap-2 mt-0.5">
+                                ${item.barcode ? `<span class="font-mono bg-slate-100 px-1.5 py-0.5 rounded text-slate-600">كود: ${escapeHtml(item.barcode)}</span>` : ''}
+                                ${item.category ? `<span class="bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded font-semibold">${escapeHtml(item.category)}</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="text-left shrink-0">
+                            <div class="text-xs font-black text-emerald-700">${formatCurrency(item.unitPrice)} ج.م</div>
+                            <div class="text-[10px] text-slate-500 font-bold">الرصيد: ${formatNumber(item.systemQty)}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            dom.autocompleteList.innerHTML = html;
+            dom.autocompleteList.classList.remove('hidden');
+        }
+
+        function hideAutocomplete() {
+            dom.autocompleteList.classList.add('hidden');
+        }
+
+        function selectAutocompleteItem(itemName) {
+            const item = systemItems.find(s => s.name === itemName);
+            if (item) applySelectedSystemItem(item);
+        }
+
+        function applySelectedSystemItem(item) {
+            dom.productName.value = item.name;
+            dom.clearNameBtn.classList.remove('hidden');
+            hideAutocomplete();
+            checkAndShowLiveBadge(item.name);
+            dom.quantityInput.focus();
+            dom.quantityInput.select();
+        }
+
+        function addCurrentQuantity() {
+            const raw = dom.quantityInput.value.trim();
+            if (!raw) return;
+            const val = parseFloat(raw);
+            if (isNaN(val) || val <= 0) {
+                showToast("الرجاء إدخال رقم كمية موجب", "⚠️");
+                dom.quantityInput.focus();
+                return;
+            }
+            activeQuantities.push(val);
+            dom.quantityInput.value = '';
+            updateCurrentProductAccumulator();
+            dom.quantityInput.focus();
+        }
+
+        function removeActiveQuantity(index) {
+            activeQuantities.splice(index, 1);
+            updateCurrentProductAccumulator();
+        }
+
+        function updateCurrentProductAccumulator() {
+            const total = activeQuantities.reduce((sum, n) => sum + n, 0);
+            dom.currentTotalDisplay.innerText = formatNumber(total);
+            if (activeQuantities.length === 0) {
+                dom.currentQtyTags.innerHTML = `<span class="text-xs text-slate-400 italic">لم يتم إدخال كميات بعد...</span>`;
+            } else {
+                let tagsHtml = '';
+                activeQuantities.forEach((q, idx) => {
+                    tagsHtml += `
+                        <span class="inline-flex items-center gap-1 bg-white border border-emerald-300 px-2.5 py-1 rounded-xl text-xs font-bold text-emerald-800 shadow-sm">
+                            <span>${formatNumber(q)}</span>
+                            <button type="button" onclick="removeActiveQuantity(${idx})" class="text-slate-400 hover:text-rose-600 font-normal px-0.5 ml-0.5">✕</button>
+                        </span>
+                        ${idx < activeQuantities.length - 1 ? '<span class="text-emerald-400 font-bold text-xs">+</span>' : ''}
+                    `;
+                });
+                dom.currentQtyTags.innerHTML = tagsHtml;
+            }
+        }
+
+        async function saveActiveProduct() {
+            const name = dom.productName.value.trim();
+            if (!name) {
+                showToast("يرجى كتابة اسم الصنف أولاً", "⚠️");
+                dom.productName.focus();
+                return;
+            }
+
+            if (activeQuantities.length === 0) {
+                const pendingQty = parseFloat(dom.quantityInput.value.trim());
+                if (!isNaN(pendingQty) && pendingQty > 0) {
+                    activeQuantities.push(pendingQty);
+                    dom.quantityInput.value = '';
+                } else {
+                    showToast("يرجى إدخال كمية واحدة على الأقل", "⚠️");
+                    dom.quantityInput.focus();
+                    return;
+                }
+            }
+
+            const totalQty = activeQuantities.reduce((sum, n) => sum + n, 0);
+            let defaultPrice = 0;
+            let barcode = '';
+            const norm = normalizeName(name);
+            const sysItem = systemItems.find(s => s.normalizedName === norm);
+            if (sysItem) {
+                if (sysItem.unitPrice) defaultPrice = sysItem.unitPrice;
+                if (sysItem.barcode) barcode = sysItem.barcode;
+            }
+
+            try {
+                if (currentEditingIndex !== null) {
+                    const existing = products[currentEditingIndex];
+                    const existingPrice = existing.unitPrice || defaultPrice;
+                    const finalBarcode = barcode || existing.barcode || '';
+                    
+                    const { error } = await supabaseClient
+                        .from('inventory_products')
+                        .update({
+                            name: name,
+                            quantities: activeQuantities,
+                            total_quantity: totalQty,
+                            unit_price: existingPrice,
+                            barcode: finalBarcode,
+                            updated_at: new Date().toISOString()
+                        })
+                        .eq('id', existing.id);
+                    if (error) throw error;
+
+                    products[currentEditingIndex] = {
+                        ...existing,
+                        name: name,
+                        quantities: [...activeQuantities],
+                        totalQuantity: totalQty,
+                        unitPrice: existingPrice,
+                        barcode: finalBarcode
+                    };
+
+                    showToast(`تم تعديل "${name}" بنجاح`, "✅");
+                    currentEditingIndex = null;
+                    dom.cancelEditBtn.classList.add('hidden');
+                    dom.currentModeBadge.innerText = 'صنف جديد';
+                    dom.saveProductBtn.innerHTML = `<span>💾</span><span>حفظ الصنف سحابياً</span>`;
+                } else {
+                    const existingIndex = products.findIndex(p => normalizeName(p.name) === norm);
+                    if (existingIndex !== -1) {
+                        const existing = products[existingIndex];
+                        const newQuantities = [...existing.quantities, ...activeQuantities];
+                        const newTotal = newQuantities.reduce((s, n) => s + n, 0);
+                        const finalPrice = existing.unitPrice || defaultPrice;
+
+                        const { error } = await supabaseClient
+                            .from('inventory_products')
+                            .update({
+                                quantities: newQuantities,
+                                total_quantity: newTotal,
+                                unit_price: finalPrice,
+                                updated_at: new Date().toISOString()
+                            })
+                            .eq('id', existing.id);
+                        if (error) throw error;
+
+                        products[existingIndex].quantities = newQuantities;
+                        products[existingIndex].totalQuantity = newTotal;
+                        showToast(`تمت إضافة الكميات للصنف المسجل "${name}"`, "✅");
+                    } else {
+                        const { data, error } = await supabaseClient
+                            .from('inventory_products')
+                            .insert([{
+                                name: name,
+                                quantities: activeQuantities,
+                                total_quantity: totalQty,
+                                unit_price: defaultPrice,
+                                barcode: barcode
+                            }])
+                            .select();
+                        if (error) throw error;
+
+                        products.push({
+                            id: data[0].id,
+                            name: name,
+                            quantities: [...activeQuantities],
+                            totalQuantity: totalQty,
+                            unitPrice: defaultPrice,
+                            barcode: barcode
+                        });
+                        showToast(`تم حفظ "${name}" بإجمالي ${formatNumber(totalQty)} قطعة`, "✅");
+                    }
+                }
+            } catch (err) {
+                showToast(`خطأ في الحفظ السحابي: ${err.message}`, "❌");
+            }
+
+            activeQuantities = [];
+            dom.productName.value = '';
+            dom.quantityInput.value = '';
+            dom.clearNameBtn.classList.add('hidden');
+            dom.matchedSystemBadge.classList.add('hidden');
+            hideAutocomplete();
+            updateCurrentProductAccumulator();
+            renderSavedList();
+            dom.productName.focus();
+        }
+
+        function editSavedProduct(index) {
+            const item = products[index];
+            if (!item) return;
+            currentEditingIndex = index;
+            dom.productName.value = item.name;
+            activeQuantities = [...item.quantities];
+            dom.quantityInput.value = '';
+            dom.clearNameBtn.classList.remove('hidden');
+            dom.currentModeBadge.innerText = 'تعديل صنف حالي';
+            dom.saveProductBtn.innerHTML = `<span>💾</span><span>حفظ التعديلات</span>`;
+            dom.cancelEditBtn.classList.remove('hidden');
+            checkAndShowLiveBadge(item.name);
+            updateCurrentProductAccumulator();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            dom.quantityInput.focus();
+        }
+
+        function cancelEditingProduct() {
+            currentEditingIndex = null;
+            activeQuantities = [];
+            dom.productName.value = '';
+            dom.quantityInput.value = '';
+            dom.clearNameBtn.classList.add('hidden');
+            dom.matchedSystemBadge.classList.add('hidden');
+            dom.cancelEditBtn.classList.add('hidden');
+            dom.currentModeBadge.innerText = 'صنف جديد';
+            dom.saveProductBtn.innerHTML = `<span>💾</span><span>حفظ الصنف سحابياً</span>`;
+            updateCurrentProductAccumulator();
+            dom.productName.focus();
+        }
+
+        async function deleteSavedProduct(index) {
+            const item = products[index];
+            if (!item) return;
+            openModal(`حذف "${item.name}"`, `هل تريد حذف هذا الصنف من قاعدة البيانات؟`, async () => {
+                if (currentEditingIndex === index) cancelEditingProduct();
+                try {
+                    const { error } = await supabaseClient
+                        .from('inventory_products')
+                        .delete()
+                        .eq('id', item.id);
+                    if (error) throw error;
+                    products.splice(index, 1);
+                    renderSavedList();
+                    showToast("تم حذف الصنف بنجاح", "🗑️");
+                } catch (err) {
+                    showToast(`خطأ أثناء الحذف: ${err.message}`, "❌");
+                }
+            });
+        }
+
+        function renderSavedList() {
+            const query = dom.searchSavedInput.value.trim().toLowerCase();
+            const filtered = products.map((item, originalIndex) => ({ ...item, originalIndex }))
+                                     .filter(item => item.name.toLowerCase().includes(query) || (item.barcode && item.barcode.includes(query)));
+
+            dom.itemsBadgeCount.innerText = `${products.length} صنف`;
+            dom.statTotalItems.innerText = products.length;
+            const totalUnits = products.reduce((sum, item) => sum + (item.totalQuantity || 0), 0);
+            dom.statTotalUnits.innerText = formatNumber(totalUnits);
+
+            if (products.length === 0) {
+                dom.emptyState1.classList.remove('hidden');
+                dom.savedProductsList.innerHTML = '';
+                return;
+            }
+            dom.emptyState1.classList.add('hidden');
+
+            let html = '';
+            filtered.slice().reverse().forEach((item) => {
+                const entriesStr = item.quantities.map(q => formatNumber(q)).join(' + ');
+                html += `
+                    <div class="flex items-center justify-between p-3.5 bg-slate-50 hover:bg-slate-100/80 border border-slate-200 rounded-2xl transition-all">
+                        <div class="flex-1 min-w-0 pr-1">
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold text-slate-800 text-base truncate">${escapeHtml(item.name)}</span>
+                                ${item.barcode ? `<span class="text-[10px] bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded font-mono hidden sm:inline">${escapeHtml(item.barcode)}</span>` : ''}
+                            </div>
+                            <div class="text-xs text-slate-500 mt-1 font-mono truncate">
+                                الحصر: <span class="text-slate-700">${entriesStr}</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 shrink-0">
+                            <div class="bg-white border border-slate-200 px-3 py-1.5 rounded-xl text-center shadow-xs">
+                                <span class="text-[10px] text-slate-400 font-bold block leading-none">الإجمالي</span>
+                                <span class="text-base font-black text-emerald-700 leading-tight">${formatNumber(item.totalQuantity)}</span>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <button onclick="editSavedProduct(${item.originalIndex})" class="p-2 text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 rounded-xl transition">✏️</button>
+                                <button onclick="deleteSavedProduct(${item.originalIndex})" class="p-2 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition">🗑️</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            dom.savedProductsList.innerHTML = html;
+        }
+
+        // --- System File Upload & Upsert ---
+        function handleSystemFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array', cellDates: true });
+                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const rawRows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: "" });
+
+                    let headerRowIndex = 0;
+                    for (let i = 0; i < Math.min(rawRows.length, 12); i++) {
+                        const rowStr = (rawRows[i] || []).map(c => String(c)).join(" ").toLowerCase();
+                        if (rowStr.includes("اسم الصنف") || rowStr.includes("الصنف") || rowStr.includes("الكمية") || rowStr.includes("سعر") || rowStr.includes("باركود")) {
+                            headerRowIndex = i;
+                            break;
+                        }
+                    }
+
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet, { range: headerRowIndex, defval: "" });
+                    pendingRawData = jsonData;
+                    detectedHeaders = Object.keys(jsonData[0] || {}).filter(k => k && !k.startsWith("__EMPTY"));
+                    attemptAutoMappingOrShowModal();
+                } catch (err) {
+                    showToast("حدث خطأ أثناء قراءة الملف", "❌");
+                }
+            };
+            reader.readAsArrayBuffer(file);
+            event.target.value = '';
+        }
+
+        function attemptAutoMappingOrShowModal() {
+            if (detectedHeaders.length === 0) return;
+            const nameKeywords = ['اسم الصنف', 'الصنف', 'اسم', 'المنتج', 'item', 'name'];
+            const qtyKeywords = ['إجمالى الكمية', 'اجمالي الكمية', 'كمية', 'الرصيد', 'المخزون', 'qty', 'quantity'];
+            const priceKeywords = ['سعر البيع', 'سعر', 'السعر', 'سعر الوحدة', 'price'];
+            const barcodeKeywords = ['باركود', 'بار كود', 'كود الصنف', 'barcode'];
+
+            let matchedName = detectedHeaders.find(h => nameKeywords.some(k => h.toString().toLowerCase().includes(k)));
+            let matchedQty = detectedHeaders.find(h => qtyKeywords.some(k => h.toString().toLowerCase().includes(k)));
+            let matchedPrice = detectedHeaders.find(h => priceKeywords.some(k => h.toString().toLowerCase().includes(k)));
+            let matchedBarcode = detectedHeaders.find(h => barcodeKeywords.some(k => h.toString().toLowerCase().includes(k)));
+
+            if (matchedName && matchedQty) {
+                buildAndUploadSystemItems(matchedName, matchedQty, matchedPrice || "", matchedBarcode || "");
+            } else {
+                openMappingModal(matchedName, matchedQty, matchedPrice, matchedBarcode);
+            }
+        }
+
+        function openMappingModal(guessedName, guessedQty, guessedPrice, guessedBarcode) {
+            const createOptions = (selected) => {
+                let opts = '<option value="">-- اختر العمود --</option>';
+                detectedHeaders.forEach(h => {
+                    const isSel = (h === selected) ? 'selected' : '';
+                    opts += `<option value="${escapeHtml(h)}" ${isSel}>${escapeHtml(h)}</option>`;
+                });
+                return opts;
+            };
+
+            dom.mapNameCol.innerHTML = createOptions(guessedName || detectedHeaders[0] || "");
+            dom.mapQtyCol.innerHTML = createOptions(guessedQty || (detectedHeaders.length > 1 ? detectedHeaders[1] : ""));
+            dom.mapPriceCol.innerHTML = createOptions(guessedPrice || "");
+            dom.mapBarcodeCol.innerHTML = createOptions(guessedBarcode || "");
+            dom.mappingModal.classList.remove('hidden');
+        }
+
+        function applyColumnMapping() {
+            const nameCol = dom.mapNameCol.value;
+            const qtyCol = dom.mapQtyCol.value;
+            const priceCol = dom.mapPriceCol.value;
+            const barcodeCol = dom.mapBarcodeCol.value;
+            if (!nameCol || !qtyCol) return showToast("حدد عمود الاسم وعمود الكمية على الأقل", "⚠️");
+            buildAndUploadSystemItems(nameCol, qtyCol, priceCol, barcodeCol);
+            dom.mappingModal.classList.add('hidden');
+        }
+
+        function cancelColumnMapping() {
+            dom.mappingModal.classList.add('hidden');
+        }
+
+        async function buildAndUploadSystemItems(nameCol, qtyCol, priceCol, barcodeCol) {
+            const map = new Map();
+            const categoryCol = detectedHeaders.find(h => h.includes('التصنيف') || h.includes('فئة') || h.includes('قسم'));
+
+            pendingRawData.forEach(row => {
+                const rawName = (row[nameCol] !== undefined) ? String(row[nameCol]).trim() : '';
+                if (!rawName) return;
+
+                const rawQty = parseFloat(row[qtyCol]);
+                const qty = isNaN(rawQty) ? 0 : rawQty;
+                let price = 0;
+                if (priceCol && row[priceCol] !== undefined) {
+                    const parsedP = parseFloat(row[priceCol]);
+                    if (!isNaN(parsedP)) price = parsedP;
+                }
+
+                let barcode = barcodeCol && row[barcodeCol] !== undefined ? String(row[barcodeCol]).trim() : '';
+                let category = categoryCol && row[categoryCol] !== undefined ? String(row[categoryCol]).trim() : '';
+                const norm = normalizeName(rawName);
+
+                if (map.has(norm)) {
+                    const existing = map.get(norm);
+                    existing.system_qty += qty;
+                    if (price > 0 && existing.unit_price === 0) existing.unit_price = price;
+                    if (barcode && !existing.barcode) existing.barcode = barcode;
+                } else {
+                    map.set(norm, {
+                        name: rawName,
+                        normalized_name: norm,
+                        system_qty: qty,
+                        unit_price: price,
+                        barcode: barcode,
+                        category: category,
+                        updated_at: new Date().toISOString()
+                    });
+                }
+            });
+
+            const rowsToUpsert = Array.from(map.values());
+            showToast(`جاري رفع ${rowsToUpsert.length} صنف للسحابة...`, "⏳");
+
+            try {
+                const chunkSize = 500;
+                for (let i = 0; i < rowsToUpsert.length; i += chunkSize) {
+                    const chunk = rowsToUpsert.slice(i, i + chunkSize);
+                    const { error } = await supabaseClient
+                        .from('system_items')
+                        .upsert(chunk, { onConflict: 'normalized_name' });
+                    if (error) throw error;
+                }
+                
+                await fetchOnlineData(false);
+                showToast(`تم رفع ${systemItems.length} صنف للسحابة بنجاح!`, "🎉");
+            } catch (err) {
+                showToast(`خطأ أثناء الرفع: ${err.message}`, "❌");
+            }
+        }
+
+        function updateSystemFileHeaderStatus() {
+            if (systemItems.length > 0) {
+                dom.systemFileStatus.innerText = `سحابي (${systemItems.length} صنف)`;
+                dom.systemFileStatus.className = 'text-[11px] font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200';
+                dom.clearSystemBtn.classList.remove('hidden');
+            } else {
+                dom.systemFileStatus.innerText = '0 صنف';
+                dom.systemFileStatus.className = 'text-[11px] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200';
+                dom.clearSystemBtn.classList.add('hidden');
+            }
+        }
+
+        function populateCategoryFilter() {
+            const categories = Array.from(new Set(systemItems.map(s => s.category).filter(Boolean)));
+            if (categories.length > 0) {
+                let html = '<option value="all">كل التصنيفات</option>';
+                categories.forEach(c => html += `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`);
+                dom.compCategorySelect.innerHTML = html;
+                dom.compCategorySelect.classList.remove('hidden');
+            } else {
+                dom.compCategorySelect.classList.add('hidden');
+            }
+        }
+
+        function confirmClearSystemData() {
+            openModal("حذف بيانات السيستم", "هل تريد حذف جميع أصناف السيستم من السحابة؟ لن يتأثر الحصر الفعلي.", async () => {
+                try {
+                    const { error } = await supabaseClient
+                        .from('system_items')
+                        .delete()
+                        .neq('id', 0);
+                    if (error) throw error;
+                    systemItems = [];
+                    updateSystemFileHeaderStatus();
+                    populateCategoryFilter();
+                    showToast("تم مسح بيانات السيستم", "ℹ️");
+                } catch (err) {
+                    showToast(`خطأ أثناء المسح: ${err.message}`, "❌");
+                }
+            });
+        }
+
+        // --- Comparison Engine ---
+        function setComparisonScope(scope, shouldToast = true) {
+            comparisonScope = scope;
+            if (scope === 'partial') {
+                dom.scopeBtnPartial.className = "px-4 py-2 rounded-lg text-xs font-black bg-indigo-600 text-white shadow transition flex items-center gap-1.5";
+                dom.scopeBtnFull.className = "px-4 py-2 rounded-lg text-xs font-bold text-slate-600 hover:text-indigo-900 transition flex items-center gap-1.5";
+                dom.scopeDescriptionText.innerHTML = "مقارنة <b>الأصناف المجرودة فقط</b> (جرد جزئي دوري دون احتساب باقي الشيت كعجز).";
+            } else {
+                dom.scopeBtnFull.className = "px-4 py-2 rounded-lg text-xs font-black bg-indigo-600 text-white shadow transition flex items-center gap-1.5";
+                dom.scopeBtnPartial.className = "px-4 py-2 rounded-lg text-xs font-bold text-slate-600 hover:text-indigo-900 transition flex items-center gap-1.5";
+                dom.scopeDescriptionText.innerHTML = "مقارنة <b>شاملة لكافة أصناف السيستم</b> (أي صنف لم يُعد رصيده الفعلي 0).";
+            }
+            if (shouldToast) showToast(`تم التبديل إلى ${scope === 'partial' ? 'الجرد الجزئي' : 'الجرد الكلي'}`, "🎯");
+            renderComparisonTable();
+        }
+
+        function generateComparisonData() {
+            const combinedMap = new Map();
+            products.forEach(p => {
+                const norm = normalizeName(p.name);
+                combinedMap.set(norm, {
+                    name: p.name,
+                    normalizedName: norm,
+                    actualQty: p.totalQuantity || 0,
+                    systemQty: 0,
+                    unitPrice: p.unitPrice || 0,
+                    barcode: p.barcode || '',
+                    category: ''
+                });
+            });
+
+            systemItems.forEach(s => {
+                const norm = s.normalizedName;
+                if (combinedMap.has(norm)) {
+                    const item = combinedMap.get(norm);
+                    item.systemQty = s.systemQty || 0;
+                    if ((!item.unitPrice || item.unitPrice === 0) && s.unitPrice > 0) item.unitPrice = s.unitPrice;
+                    if (!item.barcode && s.barcode) item.barcode = s.barcode;
+                    if (!item.category && s.category) item.category = s.category;
+                } else if (comparisonScope === 'full') {
+                    combinedMap.set(norm, {
+                        name: s.name,
+                        normalizedName: norm,
+                        actualQty: 0,
+                        systemQty: s.systemQty || 0,
+                        unitPrice: s.unitPrice || 0,
+                        barcode: s.barcode || '',
+                        category: s.category || ''
+                    });
+                }
+            });
+
+            return Array.from(combinedMap.values()).map(item => {
+                const diffQty = item.actualQty - item.systemQty;
+                const diffValue = diffQty * (item.unitPrice || 0);
+                const actualValue = item.actualQty * (item.unitPrice || 0);
+                const systemValue = item.systemQty * (item.unitPrice || 0);
+                let status = 'matched';
+                if (diffQty < 0) status = 'shortage';
+                else if (diffQty > 0) status = 'surplus';
+                return { ...item, diffQty, diffValue, actualValue, systemValue, status };
+            });
+        }
+
+        function setComparisonFilter(filterName) {
+            comparisonFilter = filterName;
+            renderComparisonTable();
+        }
+
+        function renderComparisonTable() {
+            const allRows = generateComparisonData();
+            let totalActualVal = 0, totalSystemVal = 0, totalShortageVal = 0, totalSurplusVal = 0;
+            let countShortage = 0, countSurplus = 0, countMatched = 0;
+
+            allRows.forEach(r => {
+                totalActualVal += r.actualValue;
+                totalSystemVal += r.systemValue;
+                if (r.diffQty < 0) {
+                    totalShortageVal += Math.abs(r.diffValue);
+                    countShortage++;
+                } else if (r.diffQty > 0) {
+                    totalSurplusVal += r.diffValue;
+                    countSurplus++;
+                } else {
+                    countMatched++;
+                }
+            });
+
+            const netDiffVal = totalActualVal - totalSystemVal;
+            dom.compKpiActualVal.innerText = formatCurrency(totalActualVal);
+            dom.compKpiSystemVal.innerText = formatCurrency(totalSystemVal);
+            dom.compKpiShortageVal.innerText = `-${formatCurrency(totalShortageVal)}`;
+            dom.compKpiSurplusVal.innerText = `+${formatCurrency(totalSurplusVal)}`;
+            dom.compKpiNetDiff.innerText = `${netDiffVal >= 0 ? '+' : ''}${formatCurrency(netDiffVal)}`;
+            dom.compKpiNetDiff.className = `text-base sm:text-lg font-black ${netDiffVal < 0 ? 'text-rose-400' : (netDiffVal > 0 ? 'text-teal-400' : 'text-white')}`;
+
+            dom.countCompAll.innerText = allRows.length;
+            dom.countCompShortage.innerText = countShortage;
+            dom.countCompSurplus.innerText = countSurplus;
+            dom.countCompMatched.innerText = countMatched;
+
+            const query = dom.compSearchInput.value.trim().toLowerCase();
+            const categoryFilter = dom.compCategorySelect.value;
+            let filtered = allRows.filter(r => {
+                const matchesSearch = r.name.toLowerCase().includes(query) || (r.barcode && r.barcode.includes(query));
+                if (!matchesSearch) return false;
+                if (categoryFilter !== 'all' && r.category !== categoryFilter) return false;
+                if (comparisonFilter === 'shortage') return r.status === 'shortage';
+                if (comparisonFilter === 'surplus') return r.status === 'surplus';
+                if (comparisonFilter === 'matched') return r.status === 'matched';
+                return true;
+            });
+
+            const sortMode = dom.compSortSelect.value;
+            filtered.sort((a, b) => {
+                if (sortMode === 'shortage-desc') return a.diffValue - b.diffValue;
+                if (sortMode === 'surplus-desc') return b.diffValue - a.diffValue;
+                if (sortMode === 'name-asc') return a.name.localeCompare(b.name, 'ar');
+                if (sortMode === 'diff-qty-desc') return Math.abs(b.diffQty) - Math.abs(a.diffQty);
+                return 0;
+            });
+
+            let html = '';
+            filtered.forEach((r, idx) => {
+                let badgeClass = r.diffQty < 0 ? 'bg-rose-50 text-rose-700 border border-rose-200' : (r.diffQty > 0 ? 'bg-teal-50 text-teal-700 border border-teal-200' : 'bg-slate-100 text-slate-700');
+                let statusText = r.diffQty < 0 ? 'عجز' : (r.diffQty > 0 ? 'زيادة' : 'متطابق');
+                let diffQtyColor = r.diffQty < 0 ? 'text-rose-600 font-black' : (r.diffQty > 0 ? 'text-teal-600 font-black' : 'text-slate-700');
+                let diffValColor = r.diffQty < 0 ? 'text-rose-700 font-black' : (r.diffQty > 0 ? 'text-teal-700 font-black' : 'text-slate-700');
+
+                html += `
+                    <tr class="hover:bg-slate-50/80 transition border-b border-slate-100">
+                        <td class="py-3 px-3 text-slate-400 font-mono text-xs">${idx + 1}</td>
+                        <td class="py-3 px-3 font-bold text-slate-900">
+                            ${escapeHtml(r.name)}
+                            ${r.barcode ? `<span class="text-[10px] text-slate-400 font-mono mr-1.5 hidden sm:inline">(${escapeHtml(r.barcode)})</span>` : ''}
+                        </td>
+                        <td class="py-3 px-3 text-center font-bold text-indigo-900 bg-indigo-50/30">${formatNumber(r.systemQty)}</td>
+                        <td class="py-3 px-3 text-center font-bold text-emerald-900 bg-emerald-50/30">${formatNumber(r.actualQty)}</td>
+                        <td class="py-3 px-3 text-center font-mono ${diffQtyColor}">${r.diffQty > 0 ? '+' : ''}${formatNumber(r.diffQty)}</td>
+                        <td class="py-3 px-3 text-center font-mono text-slate-700">${formatCurrency(r.unitPrice)}</td>
+                        <td class="py-3 px-3 text-left font-mono ${diffValColor}">${r.diffValue > 0 ? '+' : ''}${formatCurrency(r.diffValue)}</td>
+                        <td class="py-3 px-3 text-center no-print"><span class="text-[11px] font-bold px-2 py-0.5 rounded-md ${badgeClass}">${statusText}</span></td>
+                    </tr>
+                `;
+            });
+            dom.comparisonTableBody.innerHTML = html;
+        }
+
+        // --- Pricing Screen Logic ---
+        function renderPricingScreen() {
+            let html = '';
+            products.forEach((prod, index) => {
+                const subtotal = (prod.totalQuantity || 0) * (prod.unitPrice || 0);
+                html += `
+                    <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+                        <td class="py-3 px-3 text-slate-400 font-mono text-xs">${index + 1}</td>
+                        <td class="py-3 px-3 font-bold text-slate-800">${escapeHtml(prod.name)}</td>
+                        <td class="py-3 px-3 text-center font-bold text-slate-700">${formatNumber(prod.totalQuantity)}</td>
+                        <td class="py-3 px-3">
+                            <div class="flex items-center justify-center">
+                                <input type="number" step="any" min="0" value="${prod.unitPrice || ''}" placeholder="0.00"
+                                    onchange="updateProductPriceOnline(${index}, this.value)"
+                                    class="w-28 text-center font-bold px-2 py-1.5 bg-slate-50 border-2 border-slate-200 rounded-xl focus:border-emerald-500 focus:bg-white focus:outline-none transition">
+                            </div>
+                        </td>
+                        <td class="py-3 px-3 text-left font-black text-emerald-700 font-mono" id="subtotal-${index}">${formatCurrency(subtotal)}</td>
+                    </tr>
+                `;
+            });
+            dom.pricingTableBody.innerHTML = html;
+            calculateGrandPricingTotal();
+        }
+
+        async function updateProductPriceOnline(index, val) {
+            const price = parseFloat(val) || 0;
+            products[index].unitPrice = price;
+            const subtotal = (products[index].totalQuantity || 0) * price;
+            const subElem = document.getElementById(`subtotal-${index}`);
+            if (subElem) subElem.innerText = formatCurrency(subtotal);
+            calculateGrandPricingTotal();
+
+            try {
+                if (supabaseClient && products[index].id) {
+                    await supabaseClient
+                        .from('inventory_products')
+                        .update({ unit_price: price, updated_at: new Date().toISOString() })
+                        .eq('id', products[index].id);
+                }
+            } catch (e) {
+                console.error("Price update error:", e);
+            }
+        }
+
+        function calculateGrandPricingTotal() {
+            const total = products.reduce((sum, item) => sum + ((item.unitPrice || 0) * (item.totalQuantity || 0)), 0);
+            dom.pricingGrandTotal.innerText = formatCurrency(total);
+        }
+
+        // --- Report Logic ---
+        function renderReportScreen() {
+            dom.reportDateTime.innerText = new Date().toLocaleString('ar-EG');
+            const totalUnits = products.reduce((sum, item) => sum + (item.totalQuantity || 0), 0);
+            const grandTotalValue = products.reduce((sum, item) => sum + ((item.totalQuantity || 0) * (item.unitPrice || 0)), 0);
+
+            dom.repKpiItems.innerText = products.length;
+            dom.repKpiUnits.innerText = formatNumber(totalUnits);
+            dom.repKpiValue.innerText = formatCurrency(grandTotalValue);
+            dom.reportFootUnits.innerText = formatNumber(totalUnits);
+            dom.reportFootTotalVal.innerText = formatCurrency(grandTotalValue);
+
+            let html = '';
+            products.forEach((prod, index) => {
+                const subtotal = (prod.totalQuantity || 0) * (prod.unitPrice || 0);
+                const entriesStr = prod.quantities.map(q => formatNumber(q)).join(' + ');
+                html += `
+                    <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+                        <td class="py-3 px-3 text-slate-400 font-mono text-xs">${index + 1}</td>
+                        <td class="py-3 px-3 font-bold text-slate-900">${escapeHtml(prod.name)}</td>
+                        <td class="py-3 px-3 text-xs font-mono text-slate-500">${entriesStr}</td>
+                        <td class="py-3 px-3 text-center font-bold text-slate-800">${formatNumber(prod.totalQuantity)}</td>
+                        <td class="py-3 px-3 text-center font-mono text-slate-700">${formatCurrency(prod.unitPrice || 0)}</td>
+                        <td class="py-3 px-3 text-left font-black text-emerald-800 font-mono">${formatCurrency(subtotal)}</td>
+                    </tr>
+                `;
+            });
+            dom.reportTableBody.innerHTML = html;
+        }
+
+        // --- Exports ---
+        function exportToCSV() {
+            if (products.length === 0) return showToast("لا توجد بيانات", "⚠️");
+            let csv = "\uFEFFم,اسم الصنف,الباركود,الأعداد المدخلة,إجمالي الكمية,سعر الوحدة,قيمة الجرد\r\n";
+            products.forEach((item, index) => {
+                const qSum = item.totalQuantity || 0;
+                const price = item.unitPrice || 0;
+                csv += `${index + 1},"${item.name.replace(/"/g, '""')}","${item.barcode || ''}","${item.quantities.join(' + ')}",${qSum},${price},${qSum * price}\r\n`;
+            });
+            downloadCSV(csv, `تقرير_الجرد_${new Date().toISOString().slice(0, 10)}.csv`);
+        }
+
+        function exportComparisonCSV() {
+            const rows = generateComparisonData();
+            if (rows.length === 0) return showToast("لا توجد بيانات", "⚠️");
+            let csv = "\uFEFFم,اسم الصنف,الباركود,التصنيف,كمية السيستم,الجرد الفعلي,فرق الكمية,سعر الوحدة,قيمة الفرق,الحالة\r\n";
+            rows.forEach((r, idx) => {
+                const statusStr = r.diffQty < 0 ? "عجز" : (r.diffQty > 0 ? "زيادة" : "متطابق");
+                csv += `${idx + 1},"${r.name.replace(/"/g, '""')}","${r.barcode || ''}","${r.category || ''}",${r.systemQty},${r.actualQty},${r.diffQty},${r.unitPrice},${r.diffValue},${statusStr}\r\n`;
+            });
+            downloadCSV(csv, `مقارنة_الجرد_${comparisonScope}_${new Date().toISOString().slice(0, 10)}.csv`);
+        }
+
+        function downloadCSV(content, filename) {
+            const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            link.click();
+            showToast("تم تصدير ملف CSV", "📥");
+        }
+
+        // --- Navigation Steps ---
+        function switchStep(stepNumber) {
+            currentStep = stepNumber;
+            const buttons = [dom.stepBtn1, dom.stepBtn2, dom.stepBtn3, dom.stepBtn4];
+            buttons.forEach((btn, i) => {
+                btn.className = (i + 1 === stepNumber) 
+                    ? "px-3 py-1.5 rounded-lg transition-all duration-200 bg-emerald-500 shadow text-white flex items-center gap-1 font-black"
+                    : "px-3 py-1.5 rounded-lg transition-all duration-200 text-emerald-200 hover:text-white flex items-center gap-1";
+            });
+
+            dom.screen1.classList.toggle('hidden', stepNumber !== 1);
+            dom.screen2.classList.toggle('hidden', stepNumber !== 2);
+            dom.screen3.classList.toggle('hidden', stepNumber !== 3);
+            dom.screen4.classList.toggle('hidden', stepNumber !== 4);
+
+            if (stepNumber === 1) { renderSavedList(); dom.productName.focus(); }
+            else if (stepNumber === 2) renderPricingScreen();
+            else if (stepNumber === 3) renderReportScreen();
+            else if (stepNumber === 4) renderComparisonTable();
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function confirmResetInventory() {
+            openModal("بدء جرد جديد", "هل أنت متأكد من مسح بيانات الجرد الحالية بالكامل من السحابة؟", async () => {
+                try {
+                    const { error } = await supabaseClient
+                        .from('inventory_products')
+                        .delete()
+                        .neq('id', 0);
+                    if (error) throw error;
+                    products = [];
+                    activeQuantities = [];
+                    currentEditingIndex = null;
+                    switchStep(1);
+                    updateCurrentProductAccumulator();
+                    renderSavedList();
+                    showToast("تم تصفير الجرد وبدء جلسة جديدة", "✨");
+                } catch (err) {
+                    showToast(`خطأ أثناء التصفير: ${err.message}`, "❌");
+                }
+            });
+        }
+
+        function openModal(title, description, onConfirm) {
+            dom.modalTitle.innerText = title;
+            dom.modalDesc.innerText = description;
+            dom.modalContainer.classList.remove('hidden');
+            dom.modalConfirmBtn.onclick = () => { onConfirm(); closeModal(); };
+        }
+
+        function closeModal() {
+            dom.modalContainer.classList.add('hidden');
+        }
+
+        function showToast(message, icon = "✅", duration = 3000) {
+            dom.toastMessage.innerText = message;
+            dom.toastIcon.innerText = icon;
+            dom.toastBox.classList.remove('opacity-0', 'translate-y-32', 'pointer-events-none');
+            dom.toastBox.classList.add('opacity-100', 'translate-y-0');
+            setTimeout(() => {
+                dom.toastBox.classList.add('opacity-0', 'translate-y-32', 'pointer-events-none');
+                dom.toastBox.classList.remove('opacity-100', 'translate-y-0');
+            }, duration);
+        }
+
+        function clearCurrentProductName() {
+            dom.productName.value = '';
+            dom.clearNameBtn.classList.add('hidden');
+            dom.matchedSystemBadge.classList.add('hidden');
+            hideAutocomplete();
+            dom.productName.focus();
+        }
+
+        function normalizeName(str) {
+            if (!str) return '';
+            return str.toString().trim().toLowerCase()
+                .replace(/[أإآ]/g, 'ا')
+                .replace(/ة/g, 'ه')
+                .replace(/ى/g, 'ي')
+                .replace(/[\s\-_,.]+/g, ' ');
+        }
+
+        function formatNumber(num) {
+            if (num === undefined || num === null || isNaN(num)) return '0';
+            return Number(num).toLocaleString('ar-EG', { maximumFractionDigits: 3 });
+        }
+
+        function formatCurrency(num) {
+            if (num === undefined || num === null || isNaN(num)) return '0.00';
+            return Number(num).toLocaleString('ar-EG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function escapeHtml(string) {
+            const div = document.createElement('div');
+            div.textContent = string;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
