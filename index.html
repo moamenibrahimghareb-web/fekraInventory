@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>جرد المحل - نظام الجرد السحابي</title>
+    <title>جرد المحل والحسابات - نظام الإدارة السحابي</title>
     
     <meta name="theme-color" content="#047857">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="جرد المحل">
+    <meta name="apple-mobile-web-app-title" content="جرد وحسابات المحل">
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -51,16 +51,16 @@
         <div class="max-w-6xl mx-auto px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-3 space-x-reverse">
-                    <div class="bg-emerald-800 p-2 rounded-xl text-2xl shadow-inner">📦</div>
+                    <div class="bg-emerald-800 p-2 rounded-xl text-2xl shadow-inner">🏬</div>
                     <div>
                         <div class="flex items-center gap-2">
-                            <h1 class="text-xl sm:text-2xl font-black tracking-tight leading-tight">جرد المحل</h1>
+                            <h1 class="text-xl sm:text-2xl font-black tracking-tight leading-tight">جرد وحسابات المحل</h1>
                             <span id="cloud-status-badge" class="bg-emerald-800/90 text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-500/60 text-emerald-200 flex items-center gap-1.5 shadow-sm">
                                 <span id="cloud-status-dot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                                 <span id="cloud-status-text">متصل سحابياً</span>
                             </span>
                         </div>
-                        <p class="text-xs text-emerald-100 opacity-90 font-medium">مزامنة سحابية لحظية</p>
+                        <p class="text-xs text-emerald-100 opacity-90 font-medium">نظام المزامنة اللحظية الشامل</p>
                     </div>
                 </div>
 
@@ -85,6 +85,9 @@
                 </button>
                 <button id="step-btn-4" onclick="switchStep(4)" class="px-3 py-1.5 rounded-lg transition-all duration-200 text-emerald-200 hover:text-white flex items-center gap-1.5 whitespace-nowrap">
                     <span>4.</span> <span>مقارنة السيستم</span>
+                </button>
+                <button id="step-btn-5" onclick="switchStep(5)" class="px-3 py-1.5 rounded-lg transition-all duration-200 text-amber-200 hover:text-white flex items-center gap-1.5 whitespace-nowrap bg-emerald-900/50 border border-amber-400/30">
+                    <span>5.</span> <span>حسابات العملاء (عليا/ليا) 💰</span>
                 </button>
             </div>
         </div>
@@ -113,7 +116,7 @@
             </div>
         </div>
 
-        <!-- Excel / File Mapping Modal -->
+        <!-- Excel Mapping Modal (System Items) -->
         <div id="mapping-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
             <div class="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-7 shadow-2xl border border-slate-200">
                 <div class="flex items-center gap-3 mb-4 pb-3 border-b border-slate-100">
@@ -134,7 +137,7 @@
                         <select id="map-qty-col" class="w-full text-sm font-semibold p-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500"></select>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1.5" for="map-price-col">عمود السعر</label>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5" for="map-price-col">عمود سعر البيع (السعر الافتراضي)</label>
                         <select id="map-price-col" class="w-full text-sm font-semibold p-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500"></select>
                     </div>
                     <div>
@@ -154,17 +157,13 @@
         <div id="screen-1" class="space-y-5">
             <div class="bg-white rounded-3xl p-4 sm:p-5 shadow-sm border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div class="flex items-center gap-3.5">
-                    <div class="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-100 text-emerald-700 flex items-center justify-center text-2xl shrink-0">
-                        🌐
-                    </div>
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-100 text-emerald-700 flex items-center justify-center text-2xl shrink-0">🌐</div>
                     <div>
                         <div class="flex items-center gap-2">
                             <h3 class="font-bold text-slate-800 text-sm sm:text-base">قاعدة أصناف وأسعار السيستم</h3>
-                            <span id="system-file-status" class="text-[11px] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200">
-                                0 صنف
-                            </span>
+                            <span id="system-file-status" class="text-[11px] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200">0 صنف</span>
                         </div>
-                        <p class="text-xs text-slate-500 mt-0.5">مخزنة سحابياً ومتاحة لجميع الأجهزة تلقائياً.</p>
+                        <p class="text-xs text-slate-500 mt-0.5">يتم اعتماد <b>سعر البيع</b> بالسحابة كسعر افتراضي لكافة الحسابات.</p>
                     </div>
                 </div>
 
@@ -173,11 +172,9 @@
                     <button type="button" onclick="document.getElementById('system-file-input').click()"
                         class="flex-1 sm:flex-none px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold rounded-xl transition flex items-center justify-center gap-2 shadow-md shadow-emerald-600/20">
                         <span>📤</span>
-                        <span>رفع ملف السيستم (Excel/CSV)</span>
+                        <span>رفع ملف السيستم (Excel)</span>
                     </button>
-                    <button id="clear-system-btn" type="button" onclick="confirmClearSystemData()" class="hidden px-3 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-xl text-xs font-bold transition" title="حذف بيانات السيستم السحابية">
-                        ✕
-                    </button>
+                    <button id="clear-system-btn" type="button" onclick="confirmClearSystemData()" class="hidden px-3 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-xl text-xs font-bold transition" title="حذف بيانات السيستم السحابية">✕</button>
                 </div>
             </div>
 
@@ -188,25 +185,19 @@
                         <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
                         إدخال الصنف الحالي
                     </h2>
-                    <span id="current-mode-badge" class="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
-                        صنف جديد
-                    </span>
+                    <span id="current-mode-badge" class="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">صنف جديد</span>
                 </div>
 
                 <div class="mb-4 relative">
                     <div class="flex items-center justify-between mb-1.5">
-                        <label class="block text-sm font-bold text-slate-700" for="product-name-input">
-                            اسم الصنف أو الباركود
-                        </label>
+                        <label class="block text-sm font-bold text-slate-700" for="product-name-input">اسم الصنف أو الباركود</label>
                         <span id="matched-system-badge" class="text-xs text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-lg font-bold hidden"></span>
                     </div>
 
                     <div class="relative">
                         <input type="text" id="product-name-input" autocomplete="off" placeholder="اكتب اسم الصنف أو امسح الباركود..."
                             class="w-full text-lg sm:text-xl font-bold px-4 py-3.5 bg-slate-50 border-2 border-slate-200 rounded-2xl focus:border-emerald-500 focus:bg-white focus:outline-none transition-all placeholder:font-normal placeholder:text-slate-400">
-                        <button type="button" id="clear-name-btn" onclick="clearCurrentProductName()" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 hidden">
-                            ✕
-                        </button>
+                        <button type="button" id="clear-name-btn" onclick="clearCurrentProductName()" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 hidden">✕</button>
                     </div>
 
                     <div id="autocomplete-list" class="absolute z-40 right-0 left-0 mt-1 bg-white border-2 border-indigo-100 rounded-2xl shadow-2xl max-h-64 overflow-y-auto hidden divide-y divide-slate-100"></div>
@@ -221,10 +212,6 @@
                             class="px-6 sm:px-8 py-3 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-lg font-black rounded-2xl shadow-lg shadow-emerald-600/25 transition-all flex items-center justify-center shrink-0">
                             + إضافة
                         </button>
-                    </div>
-                    <div class="mt-2 text-xs text-slate-500 flex items-center justify-between">
-                        <span>💡 اضغط <b>Enter</b> بعد إدخال الرقم للإضافة الفورية</span>
-                        <span class="hidden sm:inline">يدعم الأعداد والكسور</span>
                     </div>
                 </div>
 
@@ -249,9 +236,7 @@
                         <span>💾</span>
                         <span>حفظ الصنف سحابياً</span>
                     </button>
-                    <button type="button" id="cancel-edit-btn" onclick="cancelEditingProduct()" class="hidden px-5 py-4 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-2xl transition">
-                        إلغاء التعديل
-                    </button>
+                    <button type="button" id="cancel-edit-btn" onclick="cancelEditingProduct()" class="hidden px-5 py-4 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-2xl transition">إلغاء التعديل</button>
                 </div>
             </div>
 
@@ -306,12 +291,12 @@
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 mb-4 border-b border-slate-100">
                     <div>
                         <h2 class="text-xl font-bold text-slate-800">تسعير الأصناف المجرودة</h2>
-                        <p class="text-xs text-slate-500 mt-0.5">تعديل أي سعر يُحفظ سحابياً فوراً</p>
+                        <p class="text-xs text-slate-500 mt-0.5">السعر الافتراضي معتمد على (سعر البيع) من الشيت المسجل</p>
                     </div>
                     <div class="bg-emerald-50 border border-emerald-200 rounded-2xl px-4 py-2.5 text-left shrink-0">
-                        <span class="text-xs font-bold text-slate-500 block">إجمالي قيمة الجرد:</span>
+                        <span class="text-xs font-bold text-slate-500 block">إجمالي قيمة الجرد (بسعر البيع):</span>
                         <span id="price-step-grand-total" class="text-2xl font-black text-emerald-700">0.00</span>
-                        <span class="text-xs font-bold text-emerald-700">ج.م / ر.س</span>
+                        <span class="text-xs font-bold text-emerald-700">ج.م</span>
                     </div>
                 </div>
 
@@ -322,8 +307,8 @@
                                 <th class="py-3.5 px-3">#</th>
                                 <th class="py-3.5 px-3">اسم الصنف</th>
                                 <th class="py-3.5 px-3 text-center">الكمية الفعلية</th>
-                                <th class="py-3.5 px-3 w-40 text-center">سعر الوحدة</th>
-                                <th class="py-3.5 px-3 text-left">قيمة الجرد</th>
+                                <th class="py-3.5 px-3 w-40 text-center">سعر البيع للوحدة</th>
+                                <th class="py-3.5 px-3 text-left">إجمالي القيمة</th>
                             </tr>
                         </thead>
                         <tbody id="pricing-table-body" class="divide-y divide-slate-100 text-sm"></tbody>
@@ -331,17 +316,11 @@
                 </div>
 
                 <div class="mt-6 pt-5 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
-                    <button type="button" onclick="switchStep(1)" class="w-full sm:w-auto px-5 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-2xl transition">
-                        → العودة لشاشة العد
-                    </button>
+                    <button type="button" onclick="switchStep(1)" class="w-full sm:w-auto px-5 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-2xl transition">→ العودة لشاشة العد</button>
                     <div class="flex items-center gap-2 w-full sm:w-auto">
                         <button type="button" onclick="switchStep(3)" class="flex-1 sm:flex-none px-6 py-3.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold rounded-2xl shadow-lg shadow-emerald-600/20 transition flex items-center justify-center gap-2">
                             <span>تقرير الجرد الفعلي</span>
                             <span>←</span>
-                        </button>
-                        <button type="button" onclick="switchStep(4)" class="flex-1 sm:flex-none px-6 py-3.5 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-bold rounded-2xl shadow-lg shadow-indigo-600/20 transition flex items-center justify-center gap-2">
-                            <span>مقارنة السيستم</span>
-                            <span>📊</span>
                         </button>
                     </div>
                 </div>
@@ -352,28 +331,13 @@
         <div id="screen-3" class="space-y-6 hidden">
             <div class="bg-white rounded-3xl p-4 sm:p-5 shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-3 no-print">
                 <div class="flex items-center gap-2">
-                    <button onclick="switchStep(1)" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm font-bold rounded-xl transition">
-                        ✏️ تعديل الجرد
-                    </button>
-                    <button onclick="switchStep(2)" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm font-bold rounded-xl transition">
-                        💲 تعديل الأسعار
-                    </button>
-                    <button onclick="switchStep(4)" class="px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs sm:text-sm font-bold rounded-xl transition">
-                        📊 مقارنة السيستم
-                    </button>
+                    <button onclick="switchStep(1)" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm font-bold rounded-xl transition">✏️ تعديل الجرد</button>
+                    <button onclick="switchStep(2)" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm font-bold rounded-xl transition">💲 مراجعة الأسعار</button>
                 </div>
                 <div class="flex flex-wrap items-center gap-2">
-                    <button onclick="exportToCSV()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold rounded-xl shadow transition flex items-center gap-1.5">
-                        <span>📥</span>
-                        <span>تصدير CSV</span>
-                    </button>
-                    <button onclick="window.print()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-bold rounded-xl shadow transition flex items-center gap-1.5">
-                        <span>🖨️</span>
-                        <span>طباعة</span>
-                    </button>
-                    <button onclick="confirmResetInventory()" class="px-3.5 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs sm:text-sm font-bold rounded-xl transition">
-                        🗑️ جرد جديد (تصفير سحابي)
-                    </button>
+                    <button onclick="exportToCSV()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold rounded-xl shadow transition flex items-center gap-1.5"><span>📥</span><span>تصدير CSV</span></button>
+                    <button onclick="window.print()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-bold rounded-xl shadow transition flex items-center gap-1.5"><span>🖨️</span><span>طباعة</span></button>
+                    <button onclick="confirmResetInventory()" class="px-3.5 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs sm:text-sm font-bold rounded-xl transition">🗑️ جرد جديد (تصفير سحابي)</button>
                 </div>
             </div>
 
@@ -384,7 +348,7 @@
                             <span class="text-3xl">🏬</span>
                             <h2 class="text-2xl font-black text-slate-900">تقرير الجرد الفعلي للمحل</h2>
                         </div>
-                        <p class="text-xs text-slate-500">تم إنشاء هذا التقرير سحابياً</p>
+                        <p class="text-xs text-slate-500">تم حساب القيمة الإجمالية بناءً على سعر البيع</p>
                     </div>
                     <div class="text-right sm:text-left text-xs text-slate-600 space-y-1">
                         <div><b>تاريخ التقرير:</b> <span id="report-date-time">-</span></div>
@@ -402,7 +366,7 @@
                         <span id="rep-kpi-units" class="text-2xl font-black text-slate-800">0</span>
                     </div>
                     <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-200 text-center">
-                        <span class="text-xs font-bold text-emerald-800 block mb-1">إجمالي القيمة المالية</span>
+                        <span class="text-xs font-bold text-emerald-800 block mb-1">إجمالي القيمة بأسعار البيع</span>
                         <span id="rep-kpi-value" class="text-2xl font-black text-emerald-700">0.00</span>
                     </div>
                 </div>
@@ -413,9 +377,9 @@
                             <tr class="bg-slate-100 text-slate-700 text-xs font-bold border-b-2 border-slate-300">
                                 <th class="py-3 px-3">#</th>
                                 <th class="py-3 px-3">اسم الصنف</th>
-                                <th class="py-3 px-3">الأعداد المدخلة (الحصر)</th>
+                                <th class="py-3 px-3">الأعداد المدخلة</th>
                                 <th class="py-3 px-3 text-center">إجمالي الكمية</th>
-                                <th class="py-3 px-3 text-center">سعر الوحدة</th>
+                                <th class="py-3 px-3 text-center">سعر البيع</th>
                                 <th class="py-3 px-3 text-left">قيمة الجرد</th>
                             </tr>
                         </thead>
@@ -442,38 +406,24 @@
                             <span class="text-2xl">⚖️</span>
                             <h2 class="text-xl font-black text-slate-800">مقارنة الجرد الفعلي مع السيستم</h2>
                         </div>
-                        <p class="text-xs text-slate-500 mt-0.5">مطابقة كميات الحصر الفعلي مع رصيد السيستم وحساب الفروقات</p>
+                        <p class="text-xs text-slate-500 mt-0.5">مطابقة كميات الحصر الفعلي مع رصيد السيستم وحساب الفروقات بأسعار البيع</p>
                     </div>
 
                     <div class="flex flex-wrap items-center gap-2">
-                        <button onclick="exportComparisonCSV()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold rounded-xl shadow transition flex items-center gap-1.5">
-                            <span>📥</span>
-                            <span>تصدير المقارنة (CSV)</span>
-                        </button>
-                        <button onclick="window.print()" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-bold rounded-xl shadow transition flex items-center gap-1.5">
-                            <span>🖨️</span>
-                            <span>طباعة المقارنة</span>
-                        </button>
+                        <button onclick="exportComparisonCSV()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold rounded-xl shadow transition flex items-center gap-1.5"><span>📥</span><span>تصدير المقارنة (CSV)</span></button>
+                        <button onclick="window.print()" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-bold rounded-xl shadow transition flex items-center gap-1.5"><span>🖨️</span><span>طباعة المقارنة</span></button>
                     </div>
                 </div>
 
                 <div class="my-5 p-4 bg-indigo-50/70 border-2 border-indigo-200 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
                         <span class="text-xs font-bold text-indigo-900 block mb-0.5">🎯 نطاق المقارنة:</span>
-                        <p id="scope-description-text" class="text-xs text-indigo-700">مقارنة <b>الأصناف المجرودة فقط</b> (جرد جزئي دوري دون اعتبار باقي المخزن عجزاً).</p>
+                        <p id="scope-description-text" class="text-xs text-indigo-700">مقارنة <b>الأصناف المجرودة فقط</b>.</p>
                     </div>
                     
                     <div class="flex items-center bg-white p-1 rounded-xl shadow-xs border border-indigo-200 shrink-0">
-                        <button onclick="setComparisonScope('partial')" id="scope-btn-partial"
-                            class="px-4 py-2 rounded-lg text-xs font-black bg-indigo-600 text-white shadow transition flex items-center gap-1.5">
-                            <span>⚡</span>
-                            <span>جرد جزئي (المجرود فقط)</span>
-                        </button>
-                        <button onclick="setComparisonScope('full')" id="scope-btn-full"
-                            class="px-4 py-2 rounded-lg text-xs font-bold text-slate-600 hover:text-indigo-900 transition flex items-center gap-1.5">
-                            <span>🌐</span>
-                            <span>جرد كلي (شامل المحل)</span>
-                        </button>
+                        <button onclick="setComparisonScope('partial')" id="scope-btn-partial" class="px-4 py-2 rounded-lg text-xs font-black bg-indigo-600 text-white shadow transition flex items-center gap-1.5">⚡ جرد جزئي</button>
+                        <button onclick="setComparisonScope('full')" id="scope-btn-full" class="px-4 py-2 rounded-lg text-xs font-bold text-slate-600 hover:text-indigo-900 transition flex items-center gap-1.5">🌐 جرد كلي</button>
                     </div>
                 </div>
 
@@ -495,44 +445,13 @@
                         <span id="comp-kpi-surplus-val" class="text-base sm:text-lg font-black text-teal-700">0.00</span>
                     </div>
                     <div class="col-span-2 sm:col-span-1 bg-slate-900 text-white p-3.5 rounded-2xl text-center shadow-md">
-                        <span class="text-[11px] font-bold text-slate-300 block mb-1">صافي الفرق بالقيمة</span>
+                        <span class="text-[11px] font-bold text-slate-300 block mb-1">صافي الفرق</span>
                         <span id="comp-kpi-net-diff" class="text-base sm:text-lg font-black">0.00</span>
                     </div>
                 </div>
 
-                <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-3 border-t border-slate-100 no-print">
-                    <div class="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-2xl text-xs font-bold overflow-x-auto">
-                        <button onclick="setComparisonFilter('all')" id="comp-filter-all" class="px-3 py-1.5 rounded-xl bg-white shadow-xs text-slate-800 transition">
-                            الكل (<span id="count-comp-all">0</span>)
-                        </button>
-                        <button onclick="setComparisonFilter('shortage')" id="comp-filter-shortage" class="px-3 py-1.5 rounded-xl text-rose-700 hover:bg-rose-50 transition">
-                            عجز (<span id="count-comp-shortage">0</span>)
-                        </button>
-                        <button onclick="setComparisonFilter('surplus')" id="comp-filter-surplus" class="px-3 py-1.5 rounded-xl text-teal-700 hover:bg-teal-50 transition">
-                            زيادة (<span id="count-comp-surplus">0</span>)
-                        </button>
-                        <button onclick="setComparisonFilter('matched')" id="comp-filter-matched" class="px-3 py-1.5 rounded-xl text-slate-600 hover:bg-slate-200 transition">
-                            متطابق (<span id="count-comp-matched">0</span>)
-                        </button>
-                    </div>
-
-                    <div class="flex flex-wrap items-center gap-2">
-                        <select id="comp-category-select" onchange="renderComparisonTable()" class="text-xs font-bold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-indigo-500 hidden">
-                            <option value="all">كل التصنيفات</option>
-                        </select>
-                        <select id="comp-sort-select" onchange="renderComparisonTable()" class="text-xs font-bold px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-indigo-500">
-                            <option value="shortage-desc">⚠️ أكبر عجز بالقيمة</option>
-                            <option value="surplus-desc">📈 أكبر زيادة بالقيمة</option>
-                            <option value="name-asc">🔤 أبجدياً حسب اسم الصنف</option>
-                            <option value="diff-qty-desc">🔢 أكبر فرق بالكمية</option>
-                        </select>
-                        <input type="text" id="comp-search-input" oninput="renderComparisonTable()" placeholder="🔍 بحث في المقارنة..."
-                            class="text-xs font-medium px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-indigo-500 w-36 sm:w-44">
-                    </div>
-                </div>
-
                 <div class="overflow-x-auto mt-4">
-                    <table class="w-full text-right border-collapse print:text-xs">
+                    <table class="w-full text-right border-collapse">
                         <thead>
                             <tr class="bg-slate-100 text-slate-700 text-xs font-bold border-b-2 border-slate-200">
                                 <th class="py-3 px-3">#</th>
@@ -540,7 +459,7 @@
                                 <th class="py-3 px-3 text-center">كمية السيستم</th>
                                 <th class="py-3 px-3 text-center">الجرد الفعلي</th>
                                 <th class="py-3 px-3 text-center">فرق الكمية</th>
-                                <th class="py-3 px-3 text-center">سعر الوحدة</th>
+                                <th class="py-3 px-3 text-center">سعر البيع</th>
                                 <th class="py-3 px-3 text-left">قيمة الفرق</th>
                                 <th class="py-3 px-3 text-center no-print">الحالة</th>
                             </tr>
@@ -551,21 +470,161 @@
             </div>
         </div>
 
+        <!-- SCREEN 5: CUSTOMER ACCOUNTS (عليا كام / ليا كام) -->
+        <div id="screen-5" class="space-y-6 hidden">
+            <!-- Summary KPI Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="bg-emerald-700 text-white p-5 rounded-3xl shadow-lg shadow-emerald-700/20 relative overflow-hidden">
+                    <div class="relative z-10">
+                        <span class="text-xs font-bold text-emerald-200 block mb-1">🟢 إجمالي اللي ليا عند العملاء (المدرجين)</span>
+                        <div class="text-3xl font-black tracking-tight" id="acc-kpi-receivable">0.00 <span class="text-sm font-normal">ج.م</span></div>
+                        <div class="text-[11px] text-emerald-100 mt-2" id="acc-count-receivable">0 عميل مدرج</div>
+                    </div>
+                </div>
+
+                <div class="bg-rose-700 text-white p-5 rounded-3xl shadow-lg shadow-rose-700/20 relative overflow-hidden">
+                    <div class="relative z-10">
+                        <span class="text-xs font-bold text-rose-200 block mb-1">🔴 إجمالي اللي عليا للموردين (المدرجين)</span>
+                        <div class="text-3xl font-black tracking-tight" id="acc-kpi-payable">0.00 <span class="text-sm font-normal">ج.م</span></div>
+                        <div class="text-[11px] text-rose-100 mt-2" id="acc-count-payable">0 مورد مدرج</div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900 text-white p-5 rounded-3xl shadow-lg relative overflow-hidden">
+                    <div class="relative z-10">
+                        <span class="text-xs font-bold text-slate-400 block mb-1">⚖️ صافي الموقف المالي (ليا - عليا)</span>
+                        <div class="text-3xl font-black tracking-tight" id="acc-kpi-net">0.00 <span class="text-sm font-normal">ج.م</span></div>
+                        <div class="text-[11px] text-slate-300 mt-2" id="acc-status-desc">متوازن</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add / Upload Account Box -->
+            <div class="bg-white rounded-3xl p-5 sm:p-7 shadow-sm border border-slate-200">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 mb-4 border-b border-slate-100">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <span>💼</span>
+                            <span>إضافة أو تعديل حساب (عميل / مورد)</span>
+                        </h2>
+                        <p class="text-xs text-slate-500">تسجيل يدوي أو رفع شيت إكسيل للديون والمستحقات</p>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <input type="file" id="accounts-file-input" accept=".csv, .xlsx, .xls" class="hidden" onchange="handleAccountsFileUpload(event)">
+                        <button type="button" onclick="document.getElementById('accounts-file-input').click()"
+                            class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition flex items-center gap-2 shadow-sm">
+                            <span>📤</span>
+                            <span>رفع شيت الحسابات (Excel)</span>
+                        </button>
+                    </div>
+                </div>
+
+                <form id="account-form" onsubmit="handleAccountFormSubmit(event)" class="space-y-4">
+                    <input type="hidden" id="acc-edit-id" value="">
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-bold text-slate-700 mb-1" for="acc-name-input">اسم العميل / التاجر <span class="text-rose-500">*</span></label>
+                            <input type="text" id="acc-name-input" required placeholder="مثلاً: محمد علي / محل النور"
+                                class="w-full text-sm font-bold px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1" for="acc-type-select">نوع المعاملة <span class="text-rose-500">*</span></label>
+                            <select id="acc-type-select" class="w-full text-sm font-bold px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500">
+                                <option value="receivable">🟢 ليا عنده (مدين)</option>
+                                <option value="payable">🔴 عليا ليه (دائن)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1" for="acc-amount-input">المبلغ (ج.م) <span class="text-rose-500">*</span></label>
+                            <input type="number" step="any" min="0.01" id="acc-amount-input" required placeholder="0.00"
+                                class="w-full text-sm font-black px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500 text-emerald-800">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1" for="acc-phone-input">رقم الهاتف (اختياري)</label>
+                            <input type="tel" id="acc-phone-input" placeholder="01xxxxxxxxx"
+                                class="w-full text-xs font-medium px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1" for="acc-notes-input">ملاحظات (اختياري)</label>
+                            <input type="text" id="acc-notes-input" placeholder="مثلاً: دفعة مؤجلة، باقي فاتورة..."
+                                class="w-full text-xs font-medium px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500">
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2 pt-2">
+                        <button type="submit" id="acc-submit-btn" class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold rounded-xl shadow-md shadow-emerald-600/20 transition flex items-center justify-center gap-2">
+                            <span>💾</span>
+                            <span id="acc-submit-text">حفظ الحساب سحابياً</span>
+                        </button>
+                        <button type="button" id="acc-cancel-btn" onclick="resetAccountForm()" class="hidden px-5 py-3 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl transition">إلغاء</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Accounts List Table -->
+            <div class="bg-white rounded-3xl p-5 sm:p-7 shadow-sm border border-slate-200">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 mb-4 border-b border-slate-100">
+                    <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs font-bold">
+                            <button onclick="setAccountFilter('all')" id="acc-flt-all" class="px-3 py-1.5 rounded-lg bg-white shadow-xs text-slate-800">الكل (<span id="acc-count-all">0</span>)</button>
+                            <button onclick="setAccountFilter('receivable')" id="acc-flt-receivable" class="px-3 py-1.5 rounded-lg text-emerald-700 hover:bg-emerald-50">ليا فقط</button>
+                            <button onclick="setAccountFilter('payable')" id="acc-flt-payable" class="px-3 py-1.5 rounded-lg text-rose-700 hover:bg-rose-50">عليا فقط</button>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <input type="text" id="acc-search-input" oninput="renderAccountsList()" placeholder="🔍 بحث في الأسماء..."
+                            class="text-xs font-medium px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500 w-44">
+                        <button onclick="exportAccountsCSV()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition">📥 تصدير</button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-right border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-600 text-xs font-bold border-y border-slate-200">
+                                <th class="py-3 px-3 text-center w-24">في الحسبة؟</th>
+                                <th class="py-3 px-3">الاسم</th>
+                                <th class="py-3 px-3 text-center">النوع</th>
+                                <th class="py-3 px-3 text-left">المبلغ</th>
+                                <th class="py-3 px-3">الهاتف والملاحظات</th>
+                                <th class="py-3 px-3 text-center w-24">إجراء</th>
+                            </tr>
+                        </thead>
+                        <tbody id="accounts-table-body" class="divide-y divide-slate-100 text-sm"></tbody>
+                    </table>
+                </div>
+
+                <div id="acc-empty-state" class="text-center py-12 px-4 hidden">
+                    <div class="text-4xl mb-2 text-slate-300">💰</div>
+                    <p class="text-slate-600 font-bold text-sm">لا توجد حسابات مسجلة حالياً</p>
+                </div>
+            </div>
+        </div>
+
     </main>
 
     <script>
-        // Supabase Embedded Production Configuration
         const SUPABASE_URL = 'https://ovqqprpbxhibtennbvbc.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im92cXFwcnBieGhpYnRlbm5idmJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxMTAwODYsImV4cCI6MjEwMzY4NjA4Nn0.Z7-bihMmW37uexcxX7PdtOs4B8EbfD8oWcV9aMQzGhw';
 
         let supabaseClient = null;
         let products = [];
         let systemItems = [];
+        let customerAccounts = [];
         let currentEditingIndex = null;
         let activeQuantities = [];
         let currentStep = 1;
         let comparisonFilter = 'all';
         let comparisonScope = 'partial';
+        let accountFilter = 'all';
 
         let pendingRawData = [];
         let detectedHeaders = [];
@@ -603,9 +662,6 @@
             compKpiSurplusVal: document.getElementById('comp-kpi-surplus-val'),
             compKpiNetDiff: document.getElementById('comp-kpi-net-diff'),
             comparisonTableBody: document.getElementById('comparison-table-body'),
-            compSortSelect: document.getElementById('comp-sort-select'),
-            compSearchInput: document.getElementById('comp-search-input'),
-            compCategorySelect: document.getElementById('comp-category-select'),
             systemFileStatus: document.getElementById('system-file-status'),
             clearSystemBtn: document.getElementById('clear-system-btn'),
             scopeBtnPartial: document.getElementById('scope-btn-partial'),
@@ -617,25 +673,45 @@
             mapPriceCol: document.getElementById('map-price-col'),
             mapBarcodeCol: document.getElementById('map-barcode-col'),
             mappingModal: document.getElementById('mapping-modal'),
-            countCompAll: document.getElementById('count-comp-all'),
-            countCompShortage: document.getElementById('count-comp-shortage'),
-            countCompSurplus: document.getElementById('count-comp-surplus'),
-            countCompMatched: document.getElementById('count-comp-matched'),
             stepBtn1: document.getElementById('step-btn-1'),
             stepBtn2: document.getElementById('step-btn-2'),
             stepBtn3: document.getElementById('step-btn-3'),
             stepBtn4: document.getElementById('step-btn-4'),
+            stepBtn5: document.getElementById('step-btn-5'),
             screen1: document.getElementById('screen-1'),
             screen2: document.getElementById('screen-2'),
             screen3: document.getElementById('screen-3'),
             screen4: document.getElementById('screen-4'),
+            screen5: document.getElementById('screen-5'),
             modalContainer: document.getElementById('modal-container'),
             modalConfirmBtn: document.getElementById('modal-confirm-btn'),
             modalTitle: document.getElementById('modal-title'),
             modalDesc: document.getElementById('modal-desc'),
             toastBox: document.getElementById('toast-box'),
             toastMessage: document.getElementById('toast-message'),
-            toastIcon: document.getElementById('toast-icon')
+            toastIcon: document.getElementById('toast-icon'),
+            // Customer Accounts DOM
+            accKpiReceivable: document.getElementById('acc-kpi-receivable'),
+            accKpiPayable: document.getElementById('acc-kpi-payable'),
+            accKpiNet: document.getElementById('acc-kpi-net'),
+            accCountReceivable: document.getElementById('acc-count-receivable'),
+            accCountPayable: document.getElementById('acc-count-payable'),
+            accStatusDesc: document.getElementById('acc-status-desc'),
+            accEditId: document.getElementById('acc-edit-id'),
+            accNameInput: document.getElementById('acc-name-input'),
+            accTypeSelect: document.getElementById('acc-type-select'),
+            accAmountInput: document.getElementById('acc-amount-input'),
+            accPhoneInput: document.getElementById('acc-phone-input'),
+            accNotesInput: document.getElementById('acc-notes-input'),
+            accSubmitText: document.getElementById('acc-submit-text'),
+            accCancelBtn: document.getElementById('acc-cancel-btn'),
+            accountsTableBody: document.getElementById('accounts-table-body'),
+            accEmptyState: document.getElementById('acc-empty-state'),
+            accSearchInput: document.getElementById('acc-search-input'),
+            accCountAll: document.getElementById('acc-count-all'),
+            accFltAll: document.getElementById('acc-flt-all'),
+            accFltReceivable: document.getElementById('acc-flt-receivable'),
+            accFltPayable: document.getElementById('acc-flt-payable')
         };
 
         window.addEventListener('DOMContentLoaded', async () => {
@@ -653,18 +729,10 @@
 
         function setupRealtimeSubscriptions() {
             if (!supabaseClient) return;
-            supabaseClient
-                .channel('public:inventory_products')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'inventory_products' }, () => {
-                    fetchOnlineData(false);
-                })
-                .subscribe();
-
-            supabaseClient
-                .channel('public:system_items')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'system_items' }, () => {
-                    fetchOnlineData(false);
-                })
+            supabaseClient.channel('public-sync')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'inventory_products' }, () => fetchOnlineData(false))
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'system_items' }, () => fetchOnlineData(false))
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'customer_accounts' }, () => fetchOnlineData(false))
                 .subscribe();
         }
 
@@ -673,13 +741,7 @@
             dom.syncSpinIcon.classList.add('animate-spin');
 
             try {
-                const { data: invData, error: invErr } = await supabaseClient
-                    .from('inventory_products')
-                    .select('*')
-                    .order('id', { ascending: true });
-
-                if (invErr) throw invErr;
-
+                const { data: invData } = await supabaseClient.from('inventory_products').select('*').order('id', { ascending: true });
                 products = (invData || []).map(row => ({
                     id: row.id,
                     name: row.name,
@@ -689,30 +751,37 @@
                     barcode: row.barcode || ''
                 }));
 
-                const { data: sysData, error: sysErr } = await supabaseClient
-                    .from('system_items')
-                    .select('*');
-
-                if (sysErr) throw sysErr;
-
+                const { data: sysData } = await supabaseClient.from('system_items').select('*');
                 systemItems = (sysData || []).map(row => ({
                     id: row.id,
                     name: row.name,
-                    normalizedName: row.normalized_name,
+                    normalizedName: row.normalized_name || normalizeName(row.name),
                     systemQty: parseFloat(row.system_qty) || 0,
                     unitPrice: parseFloat(row.unit_price) || 0,
                     barcode: row.barcode || '',
                     category: row.category || ''
                 }));
 
+                const { data: accData } = await supabaseClient.from('customer_accounts').select('*').order('created_at', { ascending: false });
+                customerAccounts = (accData || []).map(row => ({
+                    id: row.id,
+                    name: row.name,
+                    type: row.type,
+                    amount: parseFloat(row.amount) || 0,
+                    isIncluded: row.is_included !== false,
+                    phone: row.phone || '',
+                    notes: row.notes || ''
+                }));
+
                 renderSavedList();
                 updateSystemFileHeaderStatus();
-                populateCategoryFilter();
                 updateCurrentProductAccumulator();
+                renderAccountsList();
 
                 if (currentStep === 2) renderPricingScreen();
                 if (currentStep === 3) renderReportScreen();
                 if (currentStep === 4) renderComparisonTable();
+                if (currentStep === 5) renderAccountsList();
 
                 if (showFeedback) showToast("تم تحديث البيانات سحابياً", "☁️");
             } catch (err) {
@@ -724,10 +793,7 @@
 
         function setupEventListeners() {
             dom.quantityInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    addCurrentQuantity();
-                }
+                if (e.key === 'Enter') { e.preventDefault(); addCurrentQuantity(); }
             });
 
             dom.productName.addEventListener('keydown', (e) => {
@@ -736,16 +802,13 @@
                     const val = dom.productName.value.trim();
                     if (!val) return;
                     const matched = findMatchingSystemItem(val);
-                    if (matched) {
-                        applySelectedSystemItem(matched);
-                    } else {
+                    if (matched) applySelectedSystemItem(matched);
+                    else {
                         hideAutocomplete();
                         dom.quantityInput.focus();
                         dom.quantityInput.select();
                     }
-                } else if (e.key === 'Escape') {
-                    hideAutocomplete();
-                }
+                } else if (e.key === 'Escape') hideAutocomplete();
             });
 
             dom.productName.addEventListener('input', () => {
@@ -774,14 +837,13 @@
             const byBarcode = systemItems.find(s => s.barcode && String(s.barcode).trim() === clean);
             if (byBarcode) return byBarcode;
             const byName = systemItems.find(s => s.normalizedName === norm);
-            if (byName) return byName;
-            return null;
+            return byName || null;
         }
 
         function checkAndShowLiveBadge(term) {
             const matched = findMatchingSystemItem(term);
             if (matched) {
-                dom.matchedSystemBadge.innerHTML = `📍 السيستم: <b>${formatNumber(matched.systemQty)}</b> ق | السعر: <b>${formatCurrency(matched.unitPrice)}</b>`;
+                dom.matchedSystemBadge.innerHTML = `📍 رصيد: <b>${formatNumber(matched.systemQty)}</b> | سعر البيع: <b>${formatCurrency(matched.unitPrice)}</b>`;
                 dom.matchedSystemBadge.classList.remove('hidden');
             } else {
                 dom.matchedSystemBadge.classList.add('hidden');
@@ -789,55 +851,38 @@
         }
 
         function showAutocompleteSuggestions(query) {
-            if (systemItems.length === 0) {
-                hideAutocomplete();
-                return;
-            }
+            if (systemItems.length === 0) return hideAutocomplete();
             const cleanQ = query.toLowerCase().trim();
             const normQ = normalizeName(cleanQ);
             const matches = systemItems.filter(item => {
-                const nameMatch = item.normalizedName.includes(normQ) || item.name.toLowerCase().includes(cleanQ);
-                const barcodeMatch = item.barcode && String(item.barcode).toLowerCase().includes(cleanQ);
-                return nameMatch || barcodeMatch;
-            }).slice(0, 15);
+                return item.normalizedName.includes(normQ) || item.name.toLowerCase().includes(cleanQ) || (item.barcode && String(item.barcode).toLowerCase().includes(cleanQ));
+            }).slice(0, 12);
 
-            if (matches.length === 0) {
-                hideAutocomplete();
-                return;
-            }
+            if (matches.length === 0) return hideAutocomplete();
 
             let html = '';
             matches.forEach((item) => {
                 html += `
-                    <div onclick="selectAutocompleteItem('${escapeHtml(item.name)}')"
-                         class="p-3 hover:bg-emerald-50 cursor-pointer transition flex items-center justify-between gap-3 text-right">
+                    <div onclick="selectAutocompleteItem('${escapeHtml(item.name)}')" class="p-3 hover:bg-emerald-50 cursor-pointer transition flex items-center justify-between gap-3 text-right">
                         <div class="flex-1 min-w-0">
                             <div class="font-bold text-slate-800 text-sm truncate">${escapeHtml(item.name)}</div>
-                            <div class="text-[11px] text-slate-400 flex items-center gap-2 mt-0.5">
-                                ${item.barcode ? `<span class="font-mono bg-slate-100 px-1.5 py-0.5 rounded text-slate-600">كود: ${escapeHtml(item.barcode)}</span>` : ''}
-                                ${item.category ? `<span class="bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded font-semibold">${escapeHtml(item.category)}</span>` : ''}
-                            </div>
+                            <div class="text-[11px] text-slate-400 mt-0.5">${item.barcode ? `كود: ${escapeHtml(item.barcode)}` : ''}</div>
                         </div>
                         <div class="text-left shrink-0">
                             <div class="text-xs font-black text-emerald-700">${formatCurrency(item.unitPrice)} ج.م</div>
-                            <div class="text-[10px] text-slate-500 font-bold">الرصيد: ${formatNumber(item.systemQty)}</div>
+                            <div class="text-[10px] text-slate-500">رصيد: ${formatNumber(item.systemQty)}</div>
                         </div>
-                    </div>
-                `;
+                    </div>`;
             });
             dom.autocompleteList.innerHTML = html;
             dom.autocompleteList.classList.remove('hidden');
         }
 
-        function hideAutocomplete() {
-            dom.autocompleteList.classList.add('hidden');
-        }
-
+        function hideAutocomplete() { dom.autocompleteList.classList.add('hidden'); }
         function selectAutocompleteItem(itemName) {
             const item = systemItems.find(s => s.name === itemName);
             if (item) applySelectedSystemItem(item);
         }
-
         function applySelectedSystemItem(item) {
             dom.productName.value = item.name;
             dom.clearNameBtn.classList.remove('hidden');
@@ -851,11 +896,7 @@
             const raw = dom.quantityInput.value.trim();
             if (!raw) return;
             const val = parseFloat(raw);
-            if (isNaN(val) || val <= 0) {
-                showToast("الرجاء إدخال رقم كمية موجب", "⚠️");
-                dom.quantityInput.focus();
-                return;
-            }
+            if (isNaN(val) || val <= 0) return showToast("الرجاء إدخال رقم كمية موجب", "⚠️");
             activeQuantities.push(val);
             dom.quantityInput.value = '';
             updateCurrentProductAccumulator();
@@ -880,8 +921,7 @@
                             <span>${formatNumber(q)}</span>
                             <button type="button" onclick="removeActiveQuantity(${idx})" class="text-slate-400 hover:text-rose-600 font-normal px-0.5 ml-0.5">✕</button>
                         </span>
-                        ${idx < activeQuantities.length - 1 ? '<span class="text-emerald-400 font-bold text-xs">+</span>' : ''}
-                    `;
+                        ${idx < activeQuantities.length - 1 ? '<span class="text-emerald-400 font-bold text-xs">+</span>' : ''}`;
                 });
                 dom.currentQtyTags.innerHTML = tagsHtml;
             }
@@ -889,22 +929,14 @@
 
         async function saveActiveProduct() {
             const name = dom.productName.value.trim();
-            if (!name) {
-                showToast("يرجى كتابة اسم الصنف أولاً", "⚠️");
-                dom.productName.focus();
-                return;
-            }
+            if (!name) return showToast("يرجى كتابة اسم الصنف أولاً", "⚠️");
 
             if (activeQuantities.length === 0) {
                 const pendingQty = parseFloat(dom.quantityInput.value.trim());
                 if (!isNaN(pendingQty) && pendingQty > 0) {
                     activeQuantities.push(pendingQty);
                     dom.quantityInput.value = '';
-                } else {
-                    showToast("يرجى إدخال كمية واحدة على الأقل", "⚠️");
-                    dom.quantityInput.focus();
-                    return;
-                }
+                } else return showToast("يرجى إدخال كمية واحدة على الأقل", "⚠️");
             }
 
             const totalQty = activeQuantities.reduce((sum, n) => sum + n, 0);
@@ -913,8 +945,8 @@
             const norm = normalizeName(name);
             const sysItem = systemItems.find(s => s.normalizedName === norm);
             if (sysItem) {
-                if (sysItem.unitPrice) defaultPrice = sysItem.unitPrice;
-                if (sysItem.barcode) barcode = sysItem.barcode;
+                defaultPrice = sysItem.unitPrice || 0;
+                barcode = sysItem.barcode || '';
             }
 
             try {
@@ -923,33 +955,14 @@
                     const existingPrice = existing.unitPrice || defaultPrice;
                     const finalBarcode = barcode || existing.barcode || '';
                     
-                    const { error } = await supabaseClient
-                        .from('inventory_products')
-                        .update({
-                            name: name,
-                            quantities: activeQuantities,
-                            total_quantity: totalQty,
-                            unit_price: existingPrice,
-                            barcode: finalBarcode,
-                            updated_at: new Date().toISOString()
-                        })
+                    const { error } = await supabaseClient.from('inventory_products')
+                        .update({ name, quantities: activeQuantities, total_quantity: totalQty, unit_price: existingPrice, barcode: finalBarcode, updated_at: new Date().toISOString() })
                         .eq('id', existing.id);
                     if (error) throw error;
 
-                    products[currentEditingIndex] = {
-                        ...existing,
-                        name: name,
-                        quantities: [...activeQuantities],
-                        totalQuantity: totalQty,
-                        unitPrice: existingPrice,
-                        barcode: finalBarcode
-                    };
-
+                    products[currentEditingIndex] = { ...existing, name, quantities: [...activeQuantities], totalQuantity: totalQty, unitPrice: existingPrice, barcode: finalBarcode };
                     showToast(`تم تعديل "${name}" بنجاح`, "✅");
-                    currentEditingIndex = null;
-                    dom.cancelEditBtn.classList.add('hidden');
-                    dom.currentModeBadge.innerText = 'صنف جديد';
-                    dom.saveProductBtn.innerHTML = `<span>💾</span><span>حفظ الصنف سحابياً</span>`;
+                    cancelEditingProduct();
                 } else {
                     const existingIndex = products.findIndex(p => normalizeName(p.name) === norm);
                     if (existingIndex !== -1) {
@@ -958,46 +971,26 @@
                         const newTotal = newQuantities.reduce((s, n) => s + n, 0);
                         const finalPrice = existing.unitPrice || defaultPrice;
 
-                        const { error } = await supabaseClient
-                            .from('inventory_products')
-                            .update({
-                                quantities: newQuantities,
-                                total_quantity: newTotal,
-                                unit_price: finalPrice,
-                                updated_at: new Date().toISOString()
-                            })
+                        const { error } = await supabaseClient.from('inventory_products')
+                            .update({ quantities: newQuantities, total_quantity: newTotal, unit_price: finalPrice, updated_at: new Date().toISOString() })
                             .eq('id', existing.id);
                         if (error) throw error;
 
                         products[existingIndex].quantities = newQuantities;
                         products[existingIndex].totalQuantity = newTotal;
-                        showToast(`تمت إضافة الكميات للصنف المسجل "${name}"`, "✅");
+                        showToast(`تمت إضافة الكميات للصنف "${name}"`, "✅");
                     } else {
-                        const { data, error } = await supabaseClient
-                            .from('inventory_products')
-                            .insert([{
-                                name: name,
-                                quantities: activeQuantities,
-                                total_quantity: totalQty,
-                                unit_price: defaultPrice,
-                                barcode: barcode
-                            }])
+                        const { data, error } = await supabaseClient.from('inventory_products')
+                            .insert([{ name, quantities: activeQuantities, total_quantity: totalQty, unit_price: defaultPrice, barcode }])
                             .select();
                         if (error) throw error;
 
-                        products.push({
-                            id: data[0].id,
-                            name: name,
-                            quantities: [...activeQuantities],
-                            totalQuantity: totalQty,
-                            unitPrice: defaultPrice,
-                            barcode: barcode
-                        });
+                        products.push({ id: data[0].id, name, quantities: [...activeQuantities], totalQuantity: totalQty, unitPrice: defaultPrice, barcode });
                         showToast(`تم حفظ "${name}" بإجمالي ${formatNumber(totalQty)} قطعة`, "✅");
                     }
                 }
             } catch (err) {
-                showToast(`خطأ في الحفظ السحابي: ${err.message}`, "❌");
+                showToast(`خطأ في الحفظ: ${err.message}`, "❌");
             }
 
             activeQuantities = [];
@@ -1048,10 +1041,7 @@
             openModal(`حذف "${item.name}"`, `هل تريد حذف هذا الصنف من قاعدة البيانات؟`, async () => {
                 if (currentEditingIndex === index) cancelEditingProduct();
                 try {
-                    const { error } = await supabaseClient
-                        .from('inventory_products')
-                        .delete()
-                        .eq('id', item.id);
+                    const { error } = await supabaseClient.from('inventory_products').delete().eq('id', item.id);
                     if (error) throw error;
                     products.splice(index, 1);
                     renderSavedList();
@@ -1087,11 +1077,9 @@
                         <div class="flex-1 min-w-0 pr-1">
                             <div class="flex items-center gap-2">
                                 <span class="font-bold text-slate-800 text-base truncate">${escapeHtml(item.name)}</span>
-                                ${item.barcode ? `<span class="text-[10px] bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded font-mono hidden sm:inline">${escapeHtml(item.barcode)}</span>` : ''}
+                                ${item.barcode ? `<span class="text-[10px] bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded font-mono">${escapeHtml(item.barcode)}</span>` : ''}
                             </div>
-                            <div class="text-xs text-slate-500 mt-1 font-mono truncate">
-                                الحصر: <span class="text-slate-700">${entriesStr}</span>
-                            </div>
+                            <div class="text-xs text-slate-500 mt-1 font-mono truncate">الحصر: <span class="text-slate-700">${entriesStr}</span></div>
                         </div>
                         <div class="flex items-center gap-3 shrink-0">
                             <div class="bg-white border border-slate-200 px-3 py-1.5 rounded-xl text-center shadow-xs">
@@ -1103,13 +1091,12 @@
                                 <button onclick="deleteSavedProduct(${item.originalIndex})" class="p-2 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition">🗑️</button>
                             </div>
                         </div>
-                    </div>
-                `;
+                    </div>`;
             });
             dom.savedProductsList.innerHTML = html;
         }
 
-        // --- System File Upload & Upsert ---
+        // --- System File Upload (Selling Price First) ---
         function handleSystemFileUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -1124,7 +1111,7 @@
                     let headerRowIndex = 0;
                     for (let i = 0; i < Math.min(rawRows.length, 12); i++) {
                         const rowStr = (rawRows[i] || []).map(c => String(c)).join(" ").toLowerCase();
-                        if (rowStr.includes("اسم الصنف") || rowStr.includes("الصنف") || rowStr.includes("الكمية") || rowStr.includes("سعر") || rowStr.includes("باركود")) {
+                        if (rowStr.includes("اسم الصنف") || rowStr.includes("الصنف") || rowStr.includes("الكمية") || rowStr.includes("سعر") || rowStr.includes("بيع")) {
                             headerRowIndex = i;
                             break;
                         }
@@ -1144,9 +1131,9 @@
 
         function attemptAutoMappingOrShowModal() {
             if (detectedHeaders.length === 0) return;
-            const nameKeywords = ['اسم الصنف', 'الصنف', 'اسم', 'المنتج', 'item', 'name'];
-            const qtyKeywords = ['إجمالى الكمية', 'اجمالي الكمية', 'كمية', 'الرصيد', 'المخزون', 'qty', 'quantity'];
-            const priceKeywords = ['سعر البيع', 'سعر', 'السعر', 'سعر الوحدة', 'price'];
+            const nameKeywords = ['اسم الصنف', 'الصنف', 'المنتج', 'item', 'name'];
+            const qtyKeywords = ['إجمالى الكمية', 'اجمالي الكمية', 'كمية', 'الرصيد', 'المخزون', 'qty'];
+            const priceKeywords = ['سعر البيع', 'سعر بيع', 'البيع', 'السعر', 'سعر', 'price'];
             const barcodeKeywords = ['باركود', 'بار كود', 'كود الصنف', 'barcode'];
 
             let matchedName = detectedHeaders.find(h => nameKeywords.some(k => h.toString().toLowerCase().includes(k)));
@@ -1188,14 +1175,10 @@
             dom.mappingModal.classList.add('hidden');
         }
 
-        function cancelColumnMapping() {
-            dom.mappingModal.classList.add('hidden');
-        }
+        function cancelColumnMapping() { dom.mappingModal.classList.add('hidden'); }
 
         async function buildAndUploadSystemItems(nameCol, qtyCol, priceCol, barcodeCol) {
             const map = new Map();
-            const categoryCol = detectedHeaders.find(h => h.includes('التصنيف') || h.includes('فئة') || h.includes('قسم'));
-
             pendingRawData.forEach(row => {
                 const rawName = (row[nameCol] !== undefined) ? String(row[nameCol]).trim() : '';
                 if (!rawName) return;
@@ -1209,7 +1192,6 @@
                 }
 
                 let barcode = barcodeCol && row[barcodeCol] !== undefined ? String(row[barcodeCol]).trim() : '';
-                let category = categoryCol && row[categoryCol] !== undefined ? String(row[categoryCol]).trim() : '';
                 const norm = normalizeName(rawName);
 
                 if (map.has(norm)) {
@@ -1224,7 +1206,7 @@
                         system_qty: qty,
                         unit_price: price,
                         barcode: barcode,
-                        category: category,
+                        category: 'عام',
                         updated_at: new Date().toISOString()
                     });
                 }
@@ -1234,17 +1216,18 @@
             showToast(`جاري رفع ${rowsToUpsert.length} صنف للسحابة...`, "⏳");
 
             try {
-                const chunkSize = 500;
+                // تصفير بيانات السيستم القديمة واستبدالها بالكامل لتفادي أي قيود أو تضارب
+                await supabaseClient.from('system_items').delete().neq('id', 0);
+
+                const chunkSize = 400;
                 for (let i = 0; i < rowsToUpsert.length; i += chunkSize) {
                     const chunk = rowsToUpsert.slice(i, i + chunkSize);
-                    const { error } = await supabaseClient
-                        .from('system_items')
-                        .upsert(chunk, { onConflict: 'normalized_name' });
+                    const { error } = await supabaseClient.from('system_items').insert(chunk);
                     if (error) throw error;
                 }
                 
                 await fetchOnlineData(false);
-                showToast(`تم رفع ${systemItems.length} صنف للسحابة بنجاح!`, "🎉");
+                showToast(`تم تحديث ${systemItems.length} صنف بسعر البيع بنجاح!`, "🎉");
             } catch (err) {
                 showToast(`خطأ أثناء الرفع: ${err.message}`, "❌");
             }
@@ -1262,29 +1245,13 @@
             }
         }
 
-        function populateCategoryFilter() {
-            const categories = Array.from(new Set(systemItems.map(s => s.category).filter(Boolean)));
-            if (categories.length > 0) {
-                let html = '<option value="all">كل التصنيفات</option>';
-                categories.forEach(c => html += `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`);
-                dom.compCategorySelect.innerHTML = html;
-                dom.compCategorySelect.classList.remove('hidden');
-            } else {
-                dom.compCategorySelect.classList.add('hidden');
-            }
-        }
-
         function confirmClearSystemData() {
             openModal("حذف بيانات السيستم", "هل تريد حذف جميع أصناف السيستم من السحابة؟ لن يتأثر الحصر الفعلي.", async () => {
                 try {
-                    const { error } = await supabaseClient
-                        .from('system_items')
-                        .delete()
-                        .neq('id', 0);
+                    const { error } = await supabaseClient.from('system_items').delete().neq('id', 0);
                     if (error) throw error;
                     systemItems = [];
                     updateSystemFileHeaderStatus();
-                    populateCategoryFilter();
                     showToast("تم مسح بيانات السيستم", "ℹ️");
                 } catch (err) {
                     showToast(`خطأ أثناء المسح: ${err.message}`, "❌");
@@ -1292,17 +1259,17 @@
             });
         }
 
-        // --- Comparison Engine ---
+        // --- Comparison Screen ---
         function setComparisonScope(scope, shouldToast = true) {
             comparisonScope = scope;
             if (scope === 'partial') {
                 dom.scopeBtnPartial.className = "px-4 py-2 rounded-lg text-xs font-black bg-indigo-600 text-white shadow transition flex items-center gap-1.5";
                 dom.scopeBtnFull.className = "px-4 py-2 rounded-lg text-xs font-bold text-slate-600 hover:text-indigo-900 transition flex items-center gap-1.5";
-                dom.scopeDescriptionText.innerHTML = "مقارنة <b>الأصناف المجرودة فقط</b> (جرد جزئي دوري دون احتساب باقي الشيت كعجز).";
+                dom.scopeDescriptionText.innerHTML = "مقارنة <b>الأصناف المجرودة فقط</b> (جرد جزئي دوري).";
             } else {
                 dom.scopeBtnFull.className = "px-4 py-2 rounded-lg text-xs font-black bg-indigo-600 text-white shadow transition flex items-center gap-1.5";
                 dom.scopeBtnPartial.className = "px-4 py-2 rounded-lg text-xs font-bold text-slate-600 hover:text-indigo-900 transition flex items-center gap-1.5";
-                dom.scopeDescriptionText.innerHTML = "مقارنة <b>شاملة لكافة أصناف السيستم</b> (أي صنف لم يُعد رصيده الفعلي 0).";
+                dom.scopeDescriptionText.innerHTML = "مقارنة <b>شاملة لكافة أصناف السيستم</b>.";
             }
             if (shouldToast) showToast(`تم التبديل إلى ${scope === 'partial' ? 'الجرد الجزئي' : 'الجرد الكلي'}`, "🎯");
             renderComparisonTable();
@@ -1318,8 +1285,7 @@
                     actualQty: p.totalQuantity || 0,
                     systemQty: 0,
                     unitPrice: p.unitPrice || 0,
-                    barcode: p.barcode || '',
-                    category: ''
+                    barcode: p.barcode || ''
                 });
             });
 
@@ -1330,7 +1296,6 @@
                     item.systemQty = s.systemQty || 0;
                     if ((!item.unitPrice || item.unitPrice === 0) && s.unitPrice > 0) item.unitPrice = s.unitPrice;
                     if (!item.barcode && s.barcode) item.barcode = s.barcode;
-                    if (!item.category && s.category) item.category = s.category;
                 } else if (comparisonScope === 'full') {
                     combinedMap.set(norm, {
                         name: s.name,
@@ -1338,8 +1303,7 @@
                         actualQty: 0,
                         systemQty: s.systemQty || 0,
                         unitPrice: s.unitPrice || 0,
-                        barcode: s.barcode || '',
-                        category: s.category || ''
+                        barcode: s.barcode || ''
                     });
                 }
             });
@@ -1356,28 +1320,15 @@
             });
         }
 
-        function setComparisonFilter(filterName) {
-            comparisonFilter = filterName;
-            renderComparisonTable();
-        }
-
         function renderComparisonTable() {
             const allRows = generateComparisonData();
             let totalActualVal = 0, totalSystemVal = 0, totalShortageVal = 0, totalSurplusVal = 0;
-            let countShortage = 0, countSurplus = 0, countMatched = 0;
 
             allRows.forEach(r => {
                 totalActualVal += r.actualValue;
                 totalSystemVal += r.systemValue;
-                if (r.diffQty < 0) {
-                    totalShortageVal += Math.abs(r.diffValue);
-                    countShortage++;
-                } else if (r.diffQty > 0) {
-                    totalSurplusVal += r.diffValue;
-                    countSurplus++;
-                } else {
-                    countMatched++;
-                }
+                if (r.diffQty < 0) totalShortageVal += Math.abs(r.diffValue);
+                else if (r.diffQty > 0) totalSurplusVal += r.diffValue;
             });
 
             const netDiffVal = totalActualVal - totalSystemVal;
@@ -1386,36 +1337,9 @@
             dom.compKpiShortageVal.innerText = `-${formatCurrency(totalShortageVal)}`;
             dom.compKpiSurplusVal.innerText = `+${formatCurrency(totalSurplusVal)}`;
             dom.compKpiNetDiff.innerText = `${netDiffVal >= 0 ? '+' : ''}${formatCurrency(netDiffVal)}`;
-            dom.compKpiNetDiff.className = `text-base sm:text-lg font-black ${netDiffVal < 0 ? 'text-rose-400' : (netDiffVal > 0 ? 'text-teal-400' : 'text-white')}`;
-
-            dom.countCompAll.innerText = allRows.length;
-            dom.countCompShortage.innerText = countShortage;
-            dom.countCompSurplus.innerText = countSurplus;
-            dom.countCompMatched.innerText = countMatched;
-
-            const query = dom.compSearchInput.value.trim().toLowerCase();
-            const categoryFilter = dom.compCategorySelect.value;
-            let filtered = allRows.filter(r => {
-                const matchesSearch = r.name.toLowerCase().includes(query) || (r.barcode && r.barcode.includes(query));
-                if (!matchesSearch) return false;
-                if (categoryFilter !== 'all' && r.category !== categoryFilter) return false;
-                if (comparisonFilter === 'shortage') return r.status === 'shortage';
-                if (comparisonFilter === 'surplus') return r.status === 'surplus';
-                if (comparisonFilter === 'matched') return r.status === 'matched';
-                return true;
-            });
-
-            const sortMode = dom.compSortSelect.value;
-            filtered.sort((a, b) => {
-                if (sortMode === 'shortage-desc') return a.diffValue - b.diffValue;
-                if (sortMode === 'surplus-desc') return b.diffValue - a.diffValue;
-                if (sortMode === 'name-asc') return a.name.localeCompare(b.name, 'ar');
-                if (sortMode === 'diff-qty-desc') return Math.abs(b.diffQty) - Math.abs(a.diffQty);
-                return 0;
-            });
 
             let html = '';
-            filtered.forEach((r, idx) => {
+            allRows.forEach((r, idx) => {
                 let badgeClass = r.diffQty < 0 ? 'bg-rose-50 text-rose-700 border border-rose-200' : (r.diffQty > 0 ? 'bg-teal-50 text-teal-700 border border-teal-200' : 'bg-slate-100 text-slate-700');
                 let statusText = r.diffQty < 0 ? 'عجز' : (r.diffQty > 0 ? 'زيادة' : 'متطابق');
                 let diffQtyColor = r.diffQty < 0 ? 'text-rose-600 font-black' : (r.diffQty > 0 ? 'text-teal-600 font-black' : 'text-slate-700');
@@ -1424,23 +1348,19 @@
                 html += `
                     <tr class="hover:bg-slate-50/80 transition border-b border-slate-100">
                         <td class="py-3 px-3 text-slate-400 font-mono text-xs">${idx + 1}</td>
-                        <td class="py-3 px-3 font-bold text-slate-900">
-                            ${escapeHtml(r.name)}
-                            ${r.barcode ? `<span class="text-[10px] text-slate-400 font-mono mr-1.5 hidden sm:inline">(${escapeHtml(r.barcode)})</span>` : ''}
-                        </td>
+                        <td class="py-3 px-3 font-bold text-slate-900">${escapeHtml(r.name)}</td>
                         <td class="py-3 px-3 text-center font-bold text-indigo-900 bg-indigo-50/30">${formatNumber(r.systemQty)}</td>
                         <td class="py-3 px-3 text-center font-bold text-emerald-900 bg-emerald-50/30">${formatNumber(r.actualQty)}</td>
                         <td class="py-3 px-3 text-center font-mono ${diffQtyColor}">${r.diffQty > 0 ? '+' : ''}${formatNumber(r.diffQty)}</td>
                         <td class="py-3 px-3 text-center font-mono text-slate-700">${formatCurrency(r.unitPrice)}</td>
                         <td class="py-3 px-3 text-left font-mono ${diffValColor}">${r.diffValue > 0 ? '+' : ''}${formatCurrency(r.diffValue)}</td>
                         <td class="py-3 px-3 text-center no-print"><span class="text-[11px] font-bold px-2 py-0.5 rounded-md ${badgeClass}">${statusText}</span></td>
-                    </tr>
-                `;
+                    </tr>`;
             });
             dom.comparisonTableBody.innerHTML = html;
         }
 
-        // --- Pricing Screen Logic ---
+        // --- Pricing Screen ---
         function renderPricingScreen() {
             let html = '';
             products.forEach((prod, index) => {
@@ -1458,8 +1378,7 @@
                             </div>
                         </td>
                         <td class="py-3 px-3 text-left font-black text-emerald-700 font-mono" id="subtotal-${index}">${formatCurrency(subtotal)}</td>
-                    </tr>
-                `;
+                    </tr>`;
             });
             dom.pricingTableBody.innerHTML = html;
             calculateGrandPricingTotal();
@@ -1475,13 +1394,12 @@
 
             try {
                 if (supabaseClient && products[index].id) {
-                    await supabaseClient
-                        .from('inventory_products')
+                    await supabaseClient.from('inventory_products')
                         .update({ unit_price: price, updated_at: new Date().toISOString() })
                         .eq('id', products[index].id);
                 }
             } catch (e) {
-                console.error("Price update error:", e);
+                console.error(e);
             }
         }
 
@@ -1490,7 +1408,7 @@
             dom.pricingGrandTotal.innerText = formatCurrency(total);
         }
 
-        // --- Report Logic ---
+        // --- Report Screen ---
         function renderReportScreen() {
             dom.reportDateTime.innerText = new Date().toLocaleString('ar-EG');
             const totalUnits = products.reduce((sum, item) => sum + (item.totalQuantity || 0), 0);
@@ -1514,16 +1432,268 @@
                         <td class="py-3 px-3 text-center font-bold text-slate-800">${formatNumber(prod.totalQuantity)}</td>
                         <td class="py-3 px-3 text-center font-mono text-slate-700">${formatCurrency(prod.unitPrice || 0)}</td>
                         <td class="py-3 px-3 text-left font-black text-emerald-800 font-mono">${formatCurrency(subtotal)}</td>
-                    </tr>
-                `;
+                    </tr>`;
             });
             dom.reportTableBody.innerHTML = html;
         }
 
-        // --- Exports ---
+        // --- CUSTOMER ACCOUNTS MODULE (عليا وليا) ---
+        function setAccountFilter(filter) {
+            accountFilter = filter;
+            dom.accFltAll.className = filter === 'all' ? "px-3 py-1.5 rounded-lg bg-white shadow-xs text-slate-800" : "px-3 py-1.5 rounded-lg text-slate-600 hover:bg-slate-200";
+            dom.accFltReceivable.className = filter === 'receivable' ? "px-3 py-1.5 rounded-lg bg-emerald-600 text-white shadow-xs" : "px-3 py-1.5 rounded-lg text-emerald-700 hover:bg-emerald-50";
+            dom.accFltPayable.className = filter === 'payable' ? "px-3 py-1.5 rounded-lg bg-rose-600 text-white shadow-xs" : "px-3 py-1.5 rounded-lg text-rose-700 hover:bg-rose-50";
+            renderAccountsList();
+        }
+
+        function calculateAccountKPIs() {
+            let totalReceivable = 0;
+            let totalPayable = 0;
+            let countRec = 0;
+            let countPay = 0;
+
+            customerAccounts.forEach(acc => {
+                if (acc.isIncluded) {
+                    if (acc.type === 'receivable') {
+                        totalReceivable += acc.amount;
+                        countRec++;
+                    } else {
+                        totalPayable += acc.amount;
+                        countPay++;
+                    }
+                }
+            });
+
+            const net = totalReceivable - totalPayable;
+            dom.accKpiReceivable.innerText = formatCurrency(totalReceivable);
+            dom.accKpiPayable.innerText = formatCurrency(totalPayable);
+            dom.accKpiNet.innerText = `${net >= 0 ? '+' : ''}${formatCurrency(net)}`;
+            dom.accCountReceivable.innerText = `${countRec} عميل مدرج بالحسبة`;
+            dom.accCountPayable.innerText = `${countPay} مورد مدرج بالحسبة`;
+            dom.accCountAll.innerText = customerAccounts.length;
+
+            if (net > 0) {
+                dom.accStatusDesc.innerText = `صافي أرباح ومستحقات لصالحك بمقدار ${formatCurrency(net)} ج.م`;
+                dom.accStatusDesc.className = "text-[11px] text-emerald-400 mt-2 font-bold";
+            } else if (net < 0) {
+                dom.accStatusDesc.innerText = `عجز ومطلوبات واجبة السداد بمقدار ${formatCurrency(Math.abs(net))} ج.م`;
+                dom.accStatusDesc.className = "text-[11px] text-rose-400 mt-2 font-bold";
+            } else {
+                dom.accStatusDesc.innerText = "الحسابات متوازنة تماماً";
+                dom.accStatusDesc.className = "text-[11px] text-slate-300 mt-2";
+            }
+        }
+
+        function renderAccountsList() {
+            calculateAccountKPIs();
+            const query = dom.accSearchInput.value.trim().toLowerCase();
+            let filtered = customerAccounts.filter(acc => {
+                const matchName = acc.name.toLowerCase().includes(query) || (acc.phone && acc.phone.includes(query));
+                if (!matchName) return false;
+                if (accountFilter === 'receivable') return acc.type === 'receivable';
+                if (accountFilter === 'payable') return acc.type === 'payable';
+                return true;
+            });
+
+            if (filtered.length === 0) {
+                dom.accEmptyState.classList.remove('hidden');
+                dom.accountsTableBody.innerHTML = '';
+                return;
+            }
+            dom.accEmptyState.classList.add('hidden');
+
+            let html = '';
+            filtered.forEach((acc, idx) => {
+                const isRec = acc.type === 'receivable';
+                const opacityClass = acc.isIncluded ? '' : 'opacity-40 bg-slate-50 line-through';
+
+                html += `
+                    <tr class="hover:bg-slate-50/80 transition border-b border-slate-100 ${opacityClass}">
+                        <td class="py-3 px-3 text-center">
+                            <input type="checkbox" ${acc.isIncluded ? 'checked' : ''} onchange="toggleAccountInclusion(${acc.id}, this.checked)"
+                                title="تضمين في الحسبة الإجمالية" class="w-4 h-4 text-emerald-600 rounded cursor-pointer accent-emerald-600">
+                        </td>
+                        <td class="py-3 px-3 font-bold text-slate-900">
+                            ${escapeHtml(acc.name)}
+                            ${!acc.isIncluded ? '<span class="text-[10px] bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded mr-1">مستبعد</span>' : ''}
+                        </td>
+                        <td class="py-3 px-3 text-center">
+                            <span class="text-xs font-bold px-2.5 py-1 rounded-lg ${isRec ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'}">
+                                ${isRec ? '🟢 ليا' : '🔴 عليا'}
+                            </span>
+                        </td>
+                        <td class="py-3 px-3 text-left font-black font-mono ${isRec ? 'text-emerald-700' : 'text-rose-700'}">
+                            ${formatCurrency(acc.amount)}
+                        </td>
+                        <td class="py-3 px-3 text-xs text-slate-500">
+                            <div>${acc.phone ? `📞 ${escapeHtml(acc.phone)}` : ''}</div>
+                            <div class="text-[11px] text-slate-400">${escapeHtml(acc.notes || '')}</div>
+                        </td>
+                        <td class="py-3 px-3 text-center">
+                            <div class="flex items-center justify-center gap-1">
+                                <button onclick="editAccount(${acc.id})" class="p-1.5 text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg">✏️</button>
+                                <button onclick="deleteAccount(${acc.id})" class="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg">🗑️</button>
+                            </div>
+                        </td>
+                    </tr>`;
+            });
+            dom.accountsTableBody.innerHTML = html;
+        }
+
+        async function toggleAccountInclusion(id, isIncluded) {
+            const acc = customerAccounts.find(a => a.id === id);
+            if (acc) acc.isIncluded = isIncluded;
+            renderAccountsList();
+
+            try {
+                await supabaseClient.from('customer_accounts').update({ is_included: isIncluded, updated_at: new Date().toISOString() }).eq('id', id);
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function handleAccountFormSubmit(event) {
+            event.preventDefault();
+            const id = dom.accEditId.value;
+            const name = dom.accNameInput.value.trim();
+            const type = dom.accTypeSelect.value;
+            const amount = parseFloat(dom.accAmountInput.value) || 0;
+            const phone = dom.accPhoneInput.value.trim();
+            const notes = dom.accNotesInput.value.trim();
+
+            if (!name || amount <= 0) return showToast("أدخل الاسم ومبلغاً صحيحاً", "⚠️");
+
+            try {
+                if (id) {
+                    const { error } = await supabaseClient.from('customer_accounts')
+                        .update({ name, type, amount, phone, notes, updated_at: new Date().toISOString() })
+                        .eq('id', id);
+                    if (error) throw error;
+                    showToast("تم تحديث الحساب بنجاح", "✅");
+                } else {
+                    const { error } = await supabaseClient.from('customer_accounts')
+                        .insert([{ name, type, amount, phone, notes, is_included: true }]);
+                    if (error) throw error;
+                    showToast("تم تسجيل الحساب الجديد بنجاح", "✅");
+                }
+                resetAccountForm();
+                await fetchOnlineData(false);
+            } catch (err) {
+                showToast(`خطأ أثناء الحفظ: ${err.message}`, "❌");
+            }
+        }
+
+        function editAccount(id) {
+            const acc = customerAccounts.find(a => a.id === id);
+            if (!acc) return;
+            dom.accEditId.value = acc.id;
+            dom.accNameInput.value = acc.name;
+            dom.accTypeSelect.value = acc.type;
+            dom.accAmountInput.value = acc.amount;
+            dom.accPhoneInput.value = acc.phone;
+            dom.accNotesInput.value = acc.notes;
+            dom.accSubmitText.innerText = "حفظ تعديل الحساب";
+            dom.accCancelBtn.classList.remove('hidden');
+            window.scrollTo({ top: dom.screen5.offsetTop, behavior: 'smooth' });
+        }
+
+        function resetAccountForm() {
+            dom.accEditId.value = '';
+            dom.accNameInput.value = '';
+            dom.accAmountInput.value = '';
+            dom.accPhoneInput.value = '';
+            dom.accNotesInput.value = '';
+            dom.accSubmitText.innerText = "حفظ الحساب سحابياً";
+            dom.accCancelBtn.classList.add('hidden');
+        }
+
+        async function deleteAccount(id) {
+            openModal("حذف الحساب", "هل تريد حذف هذا السجل نهائياً من قاعدة البيانات السحابية؟", async () => {
+                try {
+                    const { error } = await supabaseClient.from('customer_accounts').delete().eq('id', id);
+                    if (error) throw error;
+                    customerAccounts = customerAccounts.filter(a => a.id !== id);
+                    renderAccountsList();
+                    showToast("تم حذف الحساب بنجاح", "🗑️");
+                } catch (err) {
+                    showToast(`خطأ أثناء الحذف: ${err.message}`, "❌");
+                }
+            });
+        }
+
+        // Upload Accounts Excel
+        function handleAccountsFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+
+                    if (jsonData.length === 0) return showToast("الملف فارغ", "⚠️");
+
+                    const firstRow = jsonData[0];
+                    const headers = Object.keys(firstRow);
+                    const nameCol = headers.find(h => h.includes("اسم") || h.includes("عميل") || h.includes("مورد") || h.includes("name")) || headers[0];
+                    const amountCol = headers.find(h => h.includes("مبلغ") || h.includes("رصيد") || h.includes("حساب") || h.includes("amount")) || headers[1];
+                    const typeCol = headers.find(h => h.includes("نوع") || h.includes("حالة") || h.includes("type"));
+
+                    const rowsToInsert = [];
+                    jsonData.forEach(row => {
+                        const name = String(row[nameCol] || '').trim();
+                        const amount = parseFloat(row[amountCol]) || 0;
+                        if (!name || amount <= 0) return;
+
+                        let type = 'receivable';
+                        if (typeCol && row[typeCol]) {
+                            const val = String(row[typeCol]).toLowerCase();
+                            if (val.includes("عليا") || val.includes("دائن") || val.includes("مورد") || val.includes("payable")) type = 'payable';
+                        }
+
+                        rowsToInsert.push({
+                            name,
+                            amount,
+                            type,
+                            is_included: true,
+                            phone: String(row["هاتف"] || row["موبايل"] || row["phone"] || '').trim(),
+                            notes: String(row["ملاحظات"] || row["notes"] || '').trim()
+                        });
+                    });
+
+                    if (rowsToInsert.length === 0) return showToast("لم يتم العثور على بيانات صالحة للرفع", "⚠️");
+
+                    showToast(`جاري رفع ${rowsToInsert.length} حساب...`, "⏳");
+                    const { error } = await supabaseClient.from('customer_accounts').insert(rowsToInsert);
+                    if (error) throw error;
+
+                    await fetchOnlineData(false);
+                    showToast(`تم رفع ${rowsToInsert.length} حساب بنجاح!`, "🎉");
+                } catch (err) {
+                    showToast(`خطأ في قراءة ملف الحسابات: ${err.message}`, "❌");
+                }
+            };
+            reader.readAsArrayBuffer(file);
+            event.target.value = '';
+        }
+
+        function exportAccountsCSV() {
+            if (customerAccounts.length === 0) return showToast("لا توجد بيانات حسابات للتصدير", "⚠️");
+            let csv = "\uFEFFم,الاسم,النوع,المبلغ,مدرج بالحسبة,الهاتف,الملاحظات\r\n";
+            customerAccounts.forEach((acc, idx) => {
+                const typeStr = acc.type === 'receivable' ? "ليا (مدين)" : "عليا (دائن)";
+                const incStr = acc.isIncluded ? "نعم" : "مستبعد";
+                csv += `${idx + 1},"${acc.name.replace(/"/g, '""')}","${typeStr}",${acc.amount},"${incStr}","${acc.phone || ''}","${(acc.notes || '').replace(/"/g, '""')}"\r\n`;
+            });
+            downloadCSV(csv, `حسابات_العملاء_والديون_${new Date().toISOString().slice(0, 10)}.csv`);
+        }
+
+        // --- Exports & Utils ---
         function exportToCSV() {
             if (products.length === 0) return showToast("لا توجد بيانات", "⚠️");
-            let csv = "\uFEFFم,اسم الصنف,الباركود,الأعداد المدخلة,إجمالي الكمية,سعر الوحدة,قيمة الجرد\r\n";
+            let csv = "\uFEFFم,اسم الصنف,الباركود,الأعداد المدخلة,إجمالي الكمية,سعر البيع,قيمة الجرد\r\n";
             products.forEach((item, index) => {
                 const qSum = item.totalQuantity || 0;
                 const price = item.unitPrice || 0;
@@ -1535,10 +1705,10 @@
         function exportComparisonCSV() {
             const rows = generateComparisonData();
             if (rows.length === 0) return showToast("لا توجد بيانات", "⚠️");
-            let csv = "\uFEFFم,اسم الصنف,الباركود,التصنيف,كمية السيستم,الجرد الفعلي,فرق الكمية,سعر الوحدة,قيمة الفرق,الحالة\r\n";
+            let csv = "\uFEFFم,اسم الصنف,الباركود,كمية السيستم,الجرد الفعلي,فرق الكمية,سعر البيع,قيمة الفرق,الحالة\r\n";
             rows.forEach((r, idx) => {
                 const statusStr = r.diffQty < 0 ? "عجز" : (r.diffQty > 0 ? "زيادة" : "متطابق");
-                csv += `${idx + 1},"${r.name.replace(/"/g, '""')}","${r.barcode || ''}","${r.category || ''}",${r.systemQty},${r.actualQty},${r.diffQty},${r.unitPrice},${r.diffValue},${statusStr}\r\n`;
+                csv += `${idx + 1},"${r.name.replace(/"/g, '""')}","${r.barcode || ''}",${r.systemQty},${r.actualQty},${r.diffQty},${r.unitPrice},${r.diffValue},${statusStr}\r\n`;
             });
             downloadCSV(csv, `مقارنة_الجرد_${comparisonScope}_${new Date().toISOString().slice(0, 10)}.csv`);
         }
@@ -1555,22 +1725,24 @@
         // --- Navigation Steps ---
         function switchStep(stepNumber) {
             currentStep = stepNumber;
-            const buttons = [dom.stepBtn1, dom.stepBtn2, dom.stepBtn3, dom.stepBtn4];
+            const buttons = [dom.stepBtn1, dom.stepBtn2, dom.stepBtn3, dom.stepBtn4, dom.stepBtn5];
             buttons.forEach((btn, i) => {
                 btn.className = (i + 1 === stepNumber) 
-                    ? "px-3 py-1.5 rounded-lg transition-all duration-200 bg-emerald-500 shadow text-white flex items-center gap-1 font-black"
-                    : "px-3 py-1.5 rounded-lg transition-all duration-200 text-emerald-200 hover:text-white flex items-center gap-1";
+                    ? "px-3 py-1.5 rounded-lg transition-all duration-200 bg-emerald-500 shadow text-white flex items-center gap-1 font-black whitespace-nowrap"
+                    : "px-3 py-1.5 rounded-lg transition-all duration-200 text-emerald-200 hover:text-white flex items-center gap-1 whitespace-nowrap";
             });
 
             dom.screen1.classList.toggle('hidden', stepNumber !== 1);
             dom.screen2.classList.toggle('hidden', stepNumber !== 2);
             dom.screen3.classList.toggle('hidden', stepNumber !== 3);
             dom.screen4.classList.toggle('hidden', stepNumber !== 4);
+            dom.screen5.classList.toggle('hidden', stepNumber !== 5);
 
             if (stepNumber === 1) { renderSavedList(); dom.productName.focus(); }
             else if (stepNumber === 2) renderPricingScreen();
             else if (stepNumber === 3) renderReportScreen();
             else if (stepNumber === 4) renderComparisonTable();
+            else if (stepNumber === 5) renderAccountsList();
 
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -1578,10 +1750,7 @@
         function confirmResetInventory() {
             openModal("بدء جرد جديد", "هل أنت متأكد من مسح بيانات الجرد الحالية بالكامل من السحابة؟", async () => {
                 try {
-                    const { error } = await supabaseClient
-                        .from('inventory_products')
-                        .delete()
-                        .neq('id', 0);
+                    const { error } = await supabaseClient.from('inventory_products').delete().neq('id', 0);
                     if (error) throw error;
                     products = [];
                     activeQuantities = [];
@@ -1603,9 +1772,7 @@
             dom.modalConfirmBtn.onclick = () => { onConfirm(); closeModal(); };
         }
 
-        function closeModal() {
-            dom.modalContainer.classList.add('hidden');
-        }
+        function closeModal() { dom.modalContainer.classList.add('hidden'); }
 
         function showToast(message, icon = "✅", duration = 3000) {
             dom.toastMessage.innerText = message;
@@ -1649,11 +1816,7 @@
             const div = document.createElement('div');
             div.textContent = string;
             return div.innerHTML;
-
-            
         }
     </script>
 </body>
 </html>
-
-
