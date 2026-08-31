@@ -60,7 +60,7 @@
                                 <span id="cloud-status-text">متصل سحابياً</span>
                             </span>
                         </div>
-                        <p class="text-xs text-emerald-100 opacity-90 font-medium">نظام المزامنة اللحظية الشامل</p>
+                        <p class="text-xs text-emerald-100 opacity-90 font-medium">مزامنة سحابية لحظية ومطابقة تامة مع شيتات السيستم</p>
                     </div>
                 </div>
 
@@ -116,43 +116,6 @@
             </div>
         </div>
 
-        <!-- Excel Mapping Modal (System Items) -->
-        <div id="mapping-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-            <div class="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-7 shadow-2xl border border-slate-200">
-                <div class="flex items-center gap-3 mb-4 pb-3 border-b border-slate-100">
-                    <div class="bg-indigo-100 text-indigo-700 p-2.5 rounded-2xl text-xl">📊</div>
-                    <div>
-                        <h3 class="text-lg font-bold text-slate-800">تحديد أعمدة ملف السيستم</h3>
-                        <p class="text-xs text-slate-500">اختر الأعمدة لرفعها إلى قاعدة البيانات السحابية</p>
-                    </div>
-                </div>
-
-                <div class="space-y-4 mb-6">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1.5" for="map-name-col">عمود اسم الصنف <span class="text-rose-500">*</span></label>
-                        <select id="map-name-col" class="w-full text-sm font-semibold p-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500"></select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1.5" for="map-qty-col">عمود كمية السيستم (الرصيد) <span class="text-rose-500">*</span></label>
-                        <select id="map-qty-col" class="w-full text-sm font-semibold p-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500"></select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1.5" for="map-price-col">عمود سعر البيع (السعر الافتراضي)</label>
-                        <select id="map-price-col" class="w-full text-sm font-semibold p-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500"></select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1.5" for="map-barcode-col">عمود الباركود</label>
-                        <select id="map-barcode-col" class="w-full text-sm font-semibold p-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500"></select>
-                    </div>
-                </div>
-
-                <div class="flex gap-3">
-                    <button onclick="applyColumnMapping()" class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/20 transition">تأكيد ورفع للسحابة</button>
-                    <button onclick="cancelColumnMapping()" class="px-5 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition">إلغاء</button>
-                </div>
-            </div>
-        </div>
-
         <!-- SCREEN 1: COUNTING -->
         <div id="screen-1" class="space-y-5">
             <div class="bg-white rounded-3xl p-4 sm:p-5 shadow-sm border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -163,7 +126,7 @@
                             <h3 class="font-bold text-slate-800 text-sm sm:text-base">قاعدة أصناف وأسعار السيستم</h3>
                             <span id="system-file-status" class="text-[11px] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200">0 صنف</span>
                         </div>
-                        <p class="text-xs text-slate-500 mt-0.5">يتم اعتماد <b>سعر البيع</b> بالسحابة كسعر افتراضي لكافة الحسابات.</p>
+                        <p class="text-xs text-slate-500 mt-0.5">يتم اعتماد <b>سعر البيع الفعلي</b> من الشيت كسعر افتراضي تلقائي لكافة الحسابات.</p>
                     </div>
                 </div>
 
@@ -172,7 +135,7 @@
                     <button type="button" onclick="document.getElementById('system-file-input').click()"
                         class="flex-1 sm:flex-none px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold rounded-xl transition flex items-center justify-center gap-2 shadow-md shadow-emerald-600/20">
                         <span>📤</span>
-                        <span>رفع ملف السيستم (Excel)</span>
+                        <span>رفع شيت الأصناف (عرض اصناف.xlsx)</span>
                     </button>
                     <button id="clear-system-btn" type="button" onclick="confirmClearSystemData()" class="hidden px-3 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-xl text-xs font-bold transition" title="حذف بيانات السيستم السحابية">✕</button>
                 </div>
@@ -507,7 +470,7 @@
                             <span>💼</span>
                             <span>إضافة أو تعديل حساب (عميل / مورد)</span>
                         </h2>
-                        <p class="text-xs text-slate-500">تسجيل يدوي أو رفع شيت إكسيل للديون والمستحقات</p>
+                        <p class="text-xs text-slate-500">تسجيل يدوي أو رفع شيت السيستم (حسبات.xlsx)</p>
                     </div>
 
                     <div class="flex items-center gap-2">
@@ -515,7 +478,7 @@
                         <button type="button" onclick="document.getElementById('accounts-file-input').click()"
                             class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition flex items-center gap-2 shadow-sm">
                             <span>📤</span>
-                            <span>رفع شيت الحسابات (Excel)</span>
+                            <span>رفع شيت الحسابات (حسبات.xlsx)</span>
                         </button>
                     </div>
                 </div>
@@ -552,8 +515,8 @@
                                 class="w-full text-xs font-medium px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1" for="acc-notes-input">ملاحظات (اختياري)</label>
-                            <input type="text" id="acc-notes-input" placeholder="مثلاً: دفعة مؤجلة، باقي فاتورة..."
+                            <label class="block text-xs font-bold text-slate-700 mb-1" for="acc-notes-input">ملاحظات / العنوان (اختياري)</label>
+                            <input type="text" id="acc-notes-input" placeholder="العنوان أو ملاحظات الحساب..."
                                 class="w-full text-xs font-medium px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-emerald-500">
                         </div>
                     </div>
@@ -626,9 +589,6 @@
         let comparisonScope = 'partial';
         let accountFilter = 'all';
 
-        let pendingRawData = [];
-        let detectedHeaders = [];
-
         const dom = {
             productName: document.getElementById('product-name-input'),
             autocompleteList: document.getElementById('autocomplete-list'),
@@ -668,11 +628,6 @@
             scopeBtnFull: document.getElementById('scope-btn-full'),
             scopeDescriptionText: document.getElementById('scope-description-text'),
             syncSpinIcon: document.getElementById('sync-spin-icon'),
-            mapNameCol: document.getElementById('map-name-col'),
-            mapQtyCol: document.getElementById('map-qty-col'),
-            mapPriceCol: document.getElementById('map-price-col'),
-            mapBarcodeCol: document.getElementById('map-barcode-col'),
-            mappingModal: document.getElementById('mapping-modal'),
             stepBtn1: document.getElementById('step-btn-1'),
             stepBtn2: document.getElementById('step-btn-2'),
             stepBtn3: document.getElementById('step-btn-3'),
@@ -762,7 +717,7 @@
                     category: row.category || ''
                 }));
 
-                const { data: accData } = await supabaseClient.from('customer_accounts').select('*').order('created_at', { ascending: false });
+                const { data: accData } = await supabaseClient.from('customer_accounts').select('*').order('id', { ascending: true });
                 customerAccounts = (accData || []).map(row => ({
                     id: row.id,
                     name: row.name,
@@ -1096,12 +1051,12 @@
             dom.savedProductsList.innerHTML = html;
         }
 
-        // --- System File Upload (Selling Price First) ---
+        // --- System File Upload (عرض اصناف.xlsx) ---
         function handleSystemFileUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = async function(e) {
                 try {
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, { type: 'array', cellDates: true });
@@ -1110,127 +1065,166 @@
 
                     let headerRowIndex = 0;
                     for (let i = 0; i < Math.min(rawRows.length, 12); i++) {
-                        const rowStr = (rawRows[i] || []).map(c => String(c)).join(" ").toLowerCase();
-                        if (rowStr.includes("اسم الصنف") || rowStr.includes("الصنف") || rowStr.includes("الكمية") || rowStr.includes("سعر") || rowStr.includes("بيع")) {
+                        const rowStr = (rawRows[i] || []).map(c => String(c)).join(" ");
+                        if (rowStr.includes("اسم الصنف") || rowStr.includes("إجمالى الكمية") || rowStr.includes("سعر البيع")) {
                             headerRowIndex = i;
                             break;
                         }
                     }
 
-                    const jsonData = XLSX.utils.sheet_to_json(worksheet, { range: headerRowIndex, defval: "" });
-                    pendingRawData = jsonData;
-                    detectedHeaders = Object.keys(jsonData[0] || {}).filter(k => k && !k.startsWith("__EMPTY"));
-                    attemptAutoMappingOrShowModal();
+                    const headerRow = rawRows[headerRowIndex] || [];
+                    let colName = 1, colQty = 2, colSellPrice = 4, colBarcode = 9, colCategory = 11;
+
+                    headerRow.forEach((h, cIdx) => {
+                        const val = String(h).trim();
+                        if (val === "اسم الصنف" || (val.includes("اسم") && val.includes("الصنف"))) colName = cIdx;
+                        else if (val === "إجمالى الكمية" || val === "اجمالي الكمية" || val === "الكمية") colQty = cIdx;
+                        else if (val === "سعر البيع") colSellPrice = cIdx;
+                        else if (val.includes("باركود")) colBarcode = cIdx;
+                        else if (val.includes("التصنيف")) colCategory = cIdx;
+                    });
+
+                    const map = new Map();
+                    for (let i = headerRowIndex + 1; i < rawRows.length; i++) {
+                        const row = rawRows[i];
+                        if (!row || row.length === 0) continue;
+                        const rawName = String(row[colName] || '').trim();
+                        if (!rawName || rawName === 'الإجمالى' || rawName === 'الاجمالي' || rawName === 'المجموع' || rawName.toLowerCase() === 'nan') continue;
+
+                        const rawQty = parseFloat(row[colQty]);
+                        const qty = isNaN(rawQty) ? 0 : rawQty;
+                        const rawPrice = parseFloat(row[colSellPrice]);
+                        const price = isNaN(rawPrice) ? 0 : rawPrice;
+                        const barcode = String(row[colBarcode] || '').trim();
+                        const category = String(row[colCategory] || 'عام').trim();
+                        const norm = normalizeName(rawName);
+
+                        if (map.has(norm)) {
+                            const existing = map.get(norm);
+                            existing.system_qty += qty;
+                            if (price > 0 && existing.unit_price === 0) existing.unit_price = price;
+                            if (barcode && !existing.barcode) existing.barcode = barcode;
+                        } else {
+                            map.set(norm, {
+                                name: rawName,
+                                normalized_name: norm,
+                                system_qty: qty,
+                                unit_price: price,
+                                barcode: barcode,
+                                category: category || 'عام',
+                                updated_at: new Date().toISOString()
+                            });
+                        }
+                    }
+
+                    const rowsToUpsert = Array.from(map.values());
+                    if (rowsToUpsert.length === 0) return showToast("لم يتم العثور على أصناف صالحة", "⚠️");
+
+                    showToast(`جاري رفع ${rowsToUpsert.length} صنف للسحابة...`, "⏳");
+
+                    await supabaseClient.from('system_items').delete().neq('id', 0);
+
+                    const chunkSize = 300;
+                    for (let i = 0; i < rowsToUpsert.length; i += chunkSize) {
+                        const chunk = rowsToUpsert.slice(i, i + chunkSize);
+                        const { error } = await supabaseClient.from('system_items').insert(chunk);
+                        if (error) throw error;
+                    }
+
+                    await fetchOnlineData(false);
+                    showToast(`تم رفع ${systemItems.length} صنف بسعر البيع بنجاح!`, "🎉");
                 } catch (err) {
-                    showToast("حدث خطأ أثناء قراءة الملف", "❌");
+                    showToast(`خطأ أثناء الرفع: ${err.message}`, "❌");
                 }
             };
             reader.readAsArrayBuffer(file);
             event.target.value = '';
         }
 
-        function attemptAutoMappingOrShowModal() {
-            if (detectedHeaders.length === 0) return;
-            const nameKeywords = ['اسم الصنف', 'الصنف', 'المنتج', 'item', 'name'];
-            const qtyKeywords = ['إجمالى الكمية', 'اجمالي الكمية', 'كمية', 'الرصيد', 'المخزون', 'qty'];
-            const priceKeywords = ['سعر البيع', 'سعر بيع', 'البيع', 'السعر', 'سعر', 'price'];
-            const barcodeKeywords = ['باركود', 'بار كود', 'كود الصنف', 'barcode'];
+        // --- Customer Accounts Upload (حسبات.xlsx) ---
+        function handleAccountsFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const rawRows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: "" });
 
-            let matchedName = detectedHeaders.find(h => nameKeywords.some(k => h.toString().toLowerCase().includes(k)));
-            let matchedQty = detectedHeaders.find(h => qtyKeywords.some(k => h.toString().toLowerCase().includes(k)));
-            let matchedPrice = detectedHeaders.find(h => priceKeywords.some(k => h.toString().toLowerCase().includes(k)));
-            let matchedBarcode = detectedHeaders.find(h => barcodeKeywords.some(k => h.toString().toLowerCase().includes(k)));
+                    let headerRowIndex = 0;
+                    for (let i = 0; i < Math.min(rawRows.length, 10); i++) {
+                        const rowStr = (rawRows[i] || []).map(c => String(c)).join(" ");
+                        if (rowStr.includes("اسم الحساب") || rowStr.includes("رقم الحساب")) {
+                            headerRowIndex = i;
+                            break;
+                        }
+                    }
 
-            if (matchedName && matchedQty) {
-                buildAndUploadSystemItems(matchedName, matchedQty, matchedPrice || "", matchedBarcode || "");
-            } else {
-                openMappingModal(matchedName, matchedQty, matchedPrice, matchedBarcode);
-            }
-        }
+                    let colName = 2, colMadin = 3, colDaen = 4, colNature = 7, colPhone = 10, colAddress = 11;
 
-        function openMappingModal(guessedName, guessedQty, guessedPrice, guessedBarcode) {
-            const createOptions = (selected) => {
-                let opts = '<option value="">-- اختر العمود --</option>';
-                detectedHeaders.forEach(h => {
-                    const isSel = (h === selected) ? 'selected' : '';
-                    opts += `<option value="${escapeHtml(h)}" ${isSel}>${escapeHtml(h)}</option>`;
-                });
-                return opts;
+                    for (let cIdx = 0; cIdx < 20; cIdx++) {
+                        let combined = "";
+                        for (let r = headerRowIndex; r <= headerRowIndex + 1 && r < rawRows.length; r++) {
+                            if (rawRows[r] && rawRows[r][cIdx]) combined += " " + String(rawRows[r][cIdx]);
+                        }
+                        if (combined.includes("اسم الحساب")) colName = cIdx;
+                        else if ((combined.includes("مدين") || combined.includes("عليه")) && !combined.includes("شيكات")) colMadin = cIdx;
+                        else if ((combined.includes("دائن") || combined.includes("له")) && !combined.includes("شيكات")) colDaen = cIdx;
+                        else if (combined.includes("طبيعة")) colNature = cIdx;
+                        else if (combined.includes("موبايل") || combined.includes("هاتف")) colPhone = cIdx;
+                        else if (combined.includes("عنوان")) colAddress = cIdx;
+                    }
+
+                    let startRow = headerRowIndex + 1;
+                    if (rawRows[startRow] && (rawRows[startRow].join(" ").includes("مدين") || rawRows[startRow].join(" ").includes("دائن"))) {
+                        startRow++;
+                    }
+
+                    const rowsToInsert = [];
+                    for (let i = startRow; i < rawRows.length; i++) {
+                        const row = rawRows[i];
+                        if (!row || row.length <= colName) continue;
+                        const name = String(row[colName] || '').trim();
+                        if (!name || name === 'الإجمالى' || name === 'الاجمالي' || name === 'المجموع' || name.toLowerCase() === 'nan') continue;
+
+                        const madin = parseFloat(row[colMadin]) || 0;
+                        const daen = parseFloat(row[colDaen]) || 0;
+                        const nature = String(row[colNature] || 'عميل').trim();
+                        const phone = String(row[colPhone] || '').trim();
+                        const address = String(row[colAddress] || '').trim();
+
+                        if (madin > 0) {
+                            rowsToInsert.push({ name, type: 'receivable', amount: madin, is_included: true, phone, notes: address });
+                        } else if (daen > 0) {
+                            rowsToInsert.push({ name, type: 'payable', amount: daen, is_included: true, phone, notes: address });
+                        } else {
+                            rowsToInsert.push({ name, type: (nature === 'مورد' ? 'payable' : 'receivable'), amount: 0, is_included: true, phone, notes: address });
+                        }
+                    }
+
+                    if (rowsToInsert.length === 0) return showToast("لم يتم العثور على حسابات صالحة للرفع", "⚠️");
+
+                    showToast(`جاري رفع ${rowsToInsert.length} حساب...`, "⏳");
+
+                    await supabaseClient.from('customer_accounts').delete().neq('id', 0);
+
+                    const chunkSize = 300;
+                    for (let i = 0; i < rowsToInsert.length; i += chunkSize) {
+                        const chunk = rowsToInsert.slice(i, i + chunkSize);
+                        const { error } = await supabaseClient.from('customer_accounts').insert(chunk);
+                        if (error) throw error;
+                    }
+
+                    await fetchOnlineData(false);
+                    showToast(`تم رفع ${customerAccounts.length} حساب بنجاح!`, "🎉");
+                } catch (err) {
+                    showToast(`خطأ في قراءة ملف الحسابات: ${err.message}`, "❌");
+                }
             };
-
-            dom.mapNameCol.innerHTML = createOptions(guessedName || detectedHeaders[0] || "");
-            dom.mapQtyCol.innerHTML = createOptions(guessedQty || (detectedHeaders.length > 1 ? detectedHeaders[1] : ""));
-            dom.mapPriceCol.innerHTML = createOptions(guessedPrice || "");
-            dom.mapBarcodeCol.innerHTML = createOptions(guessedBarcode || "");
-            dom.mappingModal.classList.remove('hidden');
-        }
-
-        function applyColumnMapping() {
-            const nameCol = dom.mapNameCol.value;
-            const qtyCol = dom.mapQtyCol.value;
-            const priceCol = dom.mapPriceCol.value;
-            const barcodeCol = dom.mapBarcodeCol.value;
-            if (!nameCol || !qtyCol) return showToast("حدد عمود الاسم وعمود الكمية على الأقل", "⚠️");
-            buildAndUploadSystemItems(nameCol, qtyCol, priceCol, barcodeCol);
-            dom.mappingModal.classList.add('hidden');
-        }
-
-        function cancelColumnMapping() { dom.mappingModal.classList.add('hidden'); }
-
-        async function buildAndUploadSystemItems(nameCol, qtyCol, priceCol, barcodeCol) {
-            const map = new Map();
-            pendingRawData.forEach(row => {
-                const rawName = (row[nameCol] !== undefined) ? String(row[nameCol]).trim() : '';
-                if (!rawName) return;
-
-                const rawQty = parseFloat(row[qtyCol]);
-                const qty = isNaN(rawQty) ? 0 : rawQty;
-                let price = 0;
-                if (priceCol && row[priceCol] !== undefined) {
-                    const parsedP = parseFloat(row[priceCol]);
-                    if (!isNaN(parsedP)) price = parsedP;
-                }
-
-                let barcode = barcodeCol && row[barcodeCol] !== undefined ? String(row[barcodeCol]).trim() : '';
-                const norm = normalizeName(rawName);
-
-                if (map.has(norm)) {
-                    const existing = map.get(norm);
-                    existing.system_qty += qty;
-                    if (price > 0 && existing.unit_price === 0) existing.unit_price = price;
-                    if (barcode && !existing.barcode) existing.barcode = barcode;
-                } else {
-                    map.set(norm, {
-                        name: rawName,
-                        normalized_name: norm,
-                        system_qty: qty,
-                        unit_price: price,
-                        barcode: barcode,
-                        category: 'عام',
-                        updated_at: new Date().toISOString()
-                    });
-                }
-            });
-
-            const rowsToUpsert = Array.from(map.values());
-            showToast(`جاري رفع ${rowsToUpsert.length} صنف للسحابة...`, "⏳");
-
-            try {
-                // تصفير بيانات السيستم القديمة واستبدالها بالكامل لتفادي أي قيود أو تضارب
-                await supabaseClient.from('system_items').delete().neq('id', 0);
-
-                const chunkSize = 400;
-                for (let i = 0; i < rowsToUpsert.length; i += chunkSize) {
-                    const chunk = rowsToUpsert.slice(i, i + chunkSize);
-                    const { error } = await supabaseClient.from('system_items').insert(chunk);
-                    if (error) throw error;
-                }
-                
-                await fetchOnlineData(false);
-                showToast(`تم تحديث ${systemItems.length} صنف بسعر البيع بنجاح!`, "🎉");
-            } catch (err) {
-                showToast(`خطأ أثناء الرفع: ${err.message}`, "❌");
-            }
+            reader.readAsArrayBuffer(file);
+            event.target.value = '';
         }
 
         function updateSystemFileHeaderStatus() {
@@ -1473,10 +1467,10 @@
             dom.accCountAll.innerText = customerAccounts.length;
 
             if (net > 0) {
-                dom.accStatusDesc.innerText = `صافي أرباح ومستحقات لصالحك بمقدار ${formatCurrency(net)} ج.م`;
+                dom.accStatusDesc.innerText = `صافي مستحقات لصالحك: ${formatCurrency(net)} ج.م`;
                 dom.accStatusDesc.className = "text-[11px] text-emerald-400 mt-2 font-bold";
             } else if (net < 0) {
-                dom.accStatusDesc.innerText = `عجز ومطلوبات واجبة السداد بمقدار ${formatCurrency(Math.abs(net))} ج.م`;
+                dom.accStatusDesc.innerText = `صافي مطلوبات عليك: ${formatCurrency(Math.abs(net))} ج.م`;
                 dom.accStatusDesc.className = "text-[11px] text-rose-400 mt-2 font-bold";
             } else {
                 dom.accStatusDesc.innerText = "الحسابات متوازنة تماماً";
@@ -1503,7 +1497,7 @@
             dom.accEmptyState.classList.add('hidden');
 
             let html = '';
-            filtered.forEach((acc, idx) => {
+            filtered.forEach((acc) => {
                 const isRec = acc.type === 'receivable';
                 const opacityClass = acc.isIncluded ? '' : 'opacity-40 bg-slate-50 line-through';
 
@@ -1561,7 +1555,7 @@
             const phone = dom.accPhoneInput.value.trim();
             const notes = dom.accNotesInput.value.trim();
 
-            if (!name || amount <= 0) return showToast("أدخل الاسم ومبلغاً صحيحاً", "⚠️");
+            if (!name || amount < 0) return showToast("أدخل الاسم ومبلغاً صحيحاً", "⚠️");
 
             try {
                 if (id) {
@@ -1621,64 +1615,6 @@
             });
         }
 
-        // Upload Accounts Excel
-        function handleAccountsFileUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = async function(e) {
-                try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
-
-                    if (jsonData.length === 0) return showToast("الملف فارغ", "⚠️");
-
-                    const firstRow = jsonData[0];
-                    const headers = Object.keys(firstRow);
-                    const nameCol = headers.find(h => h.includes("اسم") || h.includes("عميل") || h.includes("مورد") || h.includes("name")) || headers[0];
-                    const amountCol = headers.find(h => h.includes("مبلغ") || h.includes("رصيد") || h.includes("حساب") || h.includes("amount")) || headers[1];
-                    const typeCol = headers.find(h => h.includes("نوع") || h.includes("حالة") || h.includes("type"));
-
-                    const rowsToInsert = [];
-                    jsonData.forEach(row => {
-                        const name = String(row[nameCol] || '').trim();
-                        const amount = parseFloat(row[amountCol]) || 0;
-                        if (!name || amount <= 0) return;
-
-                        let type = 'receivable';
-                        if (typeCol && row[typeCol]) {
-                            const val = String(row[typeCol]).toLowerCase();
-                            if (val.includes("عليا") || val.includes("دائن") || val.includes("مورد") || val.includes("payable")) type = 'payable';
-                        }
-
-                        rowsToInsert.push({
-                            name,
-                            amount,
-                            type,
-                            is_included: true,
-                            phone: String(row["هاتف"] || row["موبايل"] || row["phone"] || '').trim(),
-                            notes: String(row["ملاحظات"] || row["notes"] || '').trim()
-                        });
-                    });
-
-                    if (rowsToInsert.length === 0) return showToast("لم يتم العثور على بيانات صالحة للرفع", "⚠️");
-
-                    showToast(`جاري رفع ${rowsToInsert.length} حساب...`, "⏳");
-                    const { error } = await supabaseClient.from('customer_accounts').insert(rowsToInsert);
-                    if (error) throw error;
-
-                    await fetchOnlineData(false);
-                    showToast(`تم رفع ${rowsToInsert.length} حساب بنجاح!`, "🎉");
-                } catch (err) {
-                    showToast(`خطأ في قراءة ملف الحسابات: ${err.message}`, "❌");
-                }
-            };
-            reader.readAsArrayBuffer(file);
-            event.target.value = '';
-        }
-
         function exportAccountsCSV() {
             if (customerAccounts.length === 0) return showToast("لا توجد بيانات حسابات للتصدير", "⚠️");
             let csv = "\uFEFFم,الاسم,النوع,المبلغ,مدرج بالحسبة,الهاتف,الملاحظات\r\n";
@@ -1722,7 +1658,6 @@
             showToast("تم تصدير ملف CSV", "📥");
         }
 
-        // --- Navigation Steps ---
         function switchStep(stepNumber) {
             currentStep = stepNumber;
             const buttons = [dom.stepBtn1, dom.stepBtn2, dom.stepBtn3, dom.stepBtn4, dom.stepBtn5];
