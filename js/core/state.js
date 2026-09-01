@@ -1,189 +1,117 @@
 /**
- * State Management Module
- * Centralized, immutable state with change observers
+ * Centralized application state with observers and local undo/redo history.
+ * Persistence is intentionally handled by API modules, not by this class.
  */
+
+const INITIAL_STATE = Object.freeze({
+  products: [],
+  systemItems: [],
+  activeQuantities: [],
+  currentEditingIndex: null,
+  currentStep: 1,
+  comparisonFilter: 'all',
+  comparisonScope: 'partial',
+  isLoading: false,
+  isOnline: true,
+  lastSyncTime: null
+});
+
+const clone = value => JSON.parse(JSON.stringify(value));
 
 class StateManager {
   constructor() {
-    this.state = {
-      products: [],
-      systemItems: [],
-      activeQuantities: [],
-      currentEditingIndex: null,
-      currentStep: 1,
-      comparisonFilter: 'all',
-      comparisonScope: 'partial',
-      isLoading: false,
-      isOnline: true,
-      lastSyncTime: null
-    };
-
-    this.observers = [];
-    this.history = []; // For undo/redo
+    this.state = clone(INITIAL_STATE);
+    this.observers = new Set();
+    this.history = [];
+    this.future = [];
     this.maxHistory = 50;
   }
 
-  /**
-   * Subscribe to state changes
-   */
   subscribe(callback) {
-    this.observers.push(callback);
-    return () => {
-      this.observers = this.observers.filter(obs => obs !== callback);
-    };
+    if (typeof callback !== 'function') throw new TypeError('State observer must be a function');
+    this.observers.add(callback);
+    return () => this.observers.delete(callback);
   }
 
-  /**
-   * Notify all observers of state change
-   */
-  private notifyObservers(changes) {
-    this.observers.forEach(observer => observer(changes, this.state));
+  notifyObservers(changes) {
+    const snapshot = this.getState();
+    this.observers.forEach(observer => observer(changes, snapshot));
   }
 
-  /**
-   * Update state immutably
-   */
+  pushHistory() {
+    this.history.push(clone(this.state));
+    if (this.history.length > this.maxHistory) this.history.shift();
+    this.future = [];
+  }
+
   update(updates) {
-    const oldState = JSON.parse(JSON.stringify(this.state));
+    if (!updates || typeof updates !== 'object') throw new TypeError('State updates must be an object');
+    this.pushHistory();
     this.state = { ...this.state, ...updates };
-    
-    // Add to history for undo/redo
-    this.history.push(oldState);
-    if (this.history.length > this.maxHistory) {
-      this.history.shift();
-    }
-
     this.notifyObservers(updates);
-    return this.state;
+    return this.getState();
   }
 
-  /**
-   * Get current state (returns copy to prevent external mutations)
-   */
-  getState() {
-    return JSON.parse(JSON.stringify(this.state));
-  }
+  getState() { return clone(this.state); }
+  get(key) { return this.state[key]; }
 
-  /**
-   * Get single state property
-   */
-  get(key) {
-    return this.state[key];
-  }
-
-  // ===== Products =====
-  setProducts(products) {
-    return this.update({ products });
-  }
-
-  addProduct(product) {
-    const updated = [...this.state.products, product];
-    return this.update({ products: updated });
-  }
-
+  setProducts(products) { return this.update({ products: clone(products) }); }
+  addProduct(product) { return this.update({ products: [...this.state.products, clone(product)] }); }
   updateProduct(id, updates) {
-    const updated = this.state.products.map(p => p.id === id ? { ...p, ...updates } : p);
-    return this.update({ products: updated });
+    return this.update({ products: this.state.products.map(p => p.id === id ? { ...p, ...updates } : p) });
   }
+  removeProduct(id) { return this.update({ products: this.state.products.filter(p => p.id !== id) }); }
 
-  removeProduct(id) {
-    const updated = this.state.products.filter(p => p.id !== id);
-    return this.update({ products: updated });
-  }
-
-  // ===== System Items =====
-  setSystemItems(items) {
-    return this.update({ systemItems: items });
-  }
-
-  // ===== Active Quantities (for current product) =====
-  setActiveQuantities(quantities) {
-    return this.update({ activeQuantities: quantities });
-  }
-
-  addActiveQuantity(qty) {
-    const updated = [...this.state.activeQuantities, qty];
-    return this.update({ activeQuantities: updated });
-  }
-
+  setSystemItems(items) { return this.update({ systemItems: clone(items) }); }
+  setActiveQuantities(quantities) { return this.update({ activeQuantities: clone(quantities) }); }
+  addActiveQuantity(qty) { return this.update({ activeQuantities: [...this.state.activeQuantities, qty] }); }
   removeActiveQuantity(index) {
-    const updated = this.state.activeQuantities.filter((_, i) => i !== index);
-    return this.update({ activeQuantities: updated });
+    return this.update({ activeQuantities: this.state.activeQuantities.filter((_, i) => i !== index) });
   }
+  clearActiveQuantities() { return this.update({ activeQuantities: [] }); }
 
-  clearActiveQuantities() {
-    return this.update({ activeQuantities: [] });
-  }
+  setCurrentStep(step) { return this.update({ currentStep: step }); }
+  setComparisonFilter(filter) { return this.update({ comparisonFilter: filter }); }
+  setComparisonScope(scope) { return this.update({ comparisonScope: scope }); }
+  setEditingIndex(index) { return this.update({ currentEditingIndex: index }); }
+  setLoading(isLoading) { return this.update({ isLoading: Boolean(isLoading) }); }
+  setOnlineStatus(isOnline) { return this.update({ isOnline: Boolean(isOnline) }); }
+  setLastSyncTime(time) { return this.update({ lastSyncTime: time }); }
 
-  // ===== UI State =====
-  setCurrentStep(step) {
-    return this.update({ currentStep: step });
-  }
-
-  setComparisonFilter(filter) {
-    return this.update({ comparisonFilter: filter });
-  }
-
-  setComparisonScope(scope) {
-    return this.update({ comparisonScope: scope });
-  }
-
-  setEditingIndex(index) {
-    return this.update({ currentEditingIndex: index });
-  }
-
-  setLoading(isLoading) {
-    return this.update({ isLoading });
-  }
-
-  setOnlineStatus(isOnline) {
-    return this.update({ isOnline });
-  }
-
-  setLastSyncTime(time) {
-    return this.update({ lastSyncTime: time });
-  }
-
-  // ===== Undo/Redo =====
   undo() {
-    if (this.history.length === 0) return null;
+    if (!this.history.length) return null;
+    this.future.push(clone(this.state));
     this.state = this.history.pop();
     this.notifyObservers({ undoTriggered: true });
-    return this.state;
+    return this.getState();
+  }
+
+  redo() {
+    if (!this.future.length) return null;
+    this.history.push(clone(this.state));
+    this.state = this.future.pop();
+    this.notifyObservers({ redoTriggered: true });
+    return this.getState();
   }
 
   clearHistory() {
     this.history = [];
+    this.future = [];
   }
 
-  // ===== Batch Updates =====
   transaction(updateFn) {
-    const oldState = JSON.parse(JSON.stringify(this.state));
-    const updates = updateFn(this.state);
-    this.state = { ...this.state, ...updates };
-    this.history.push(oldState);
-    this.notifyObservers(updates);
-    return this.state;
+    if (typeof updateFn !== 'function') throw new TypeError('transaction requires a function');
+    const updates = updateFn(this.getState());
+    return this.update(updates || {});
   }
 
   reset() {
-    this.state = {
-      products: [],
-      systemItems: [],
-      activeQuantities: [],
-      currentEditingIndex: null,
-      currentStep: 1,
-      comparisonFilter: 'all',
-      comparisonScope: 'partial',
-      isLoading: false,
-      isOnline: true,
-      lastSyncTime: null
-    };
-    this.history = [];
+    this.pushHistory();
+    this.state = clone(INITIAL_STATE);
     this.notifyObservers({ reset: true });
+    return this.getState();
   }
 }
 
 export const stateManager = new StateManager();
-
 export default StateManager;
