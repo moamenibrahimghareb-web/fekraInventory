@@ -1,8 +1,4 @@
-/**
- * Supabase Client Module
- * Centralized Supabase client with retry logic and error handling
- */
-
+/** Centralized Supabase client. Initialization is explicit and idempotent. */
 import CONFIG from '../config.js';
 import { createLogger } from '../utils/logger.js';
 
@@ -11,233 +7,130 @@ const logger = createLogger('SupabaseClient');
 class SupabaseClientManager {
   constructor() {
     this.client = null;
-    this.subscriptions = [];
+    this.subscriptions = new Set();
     this.initialized = false;
   }
 
-  /**
-   * Initialize Supabase client
-   */
   async init() {
     if (this.initialized) return this.client;
-
-    try {
-      if (!window.supabase) {
-        throw new Error('Supabase library not loaded');
-      }
-
-      this.client = window.supabase.createClient(
-        CONFIG.SUPABASE.URL,
-        CONFIG.SUPABASE.ANON_KEY
-      );
-
-      this.initialized = true;
-      logger.info('Supabase client initialized successfully');
-      return this.client;
-    } catch (error) {
-      logger.error('Failed to initialize Supabase client', error);
-      throw error;
+    if (!CONFIG.SUPABASE.URL || !CONFIG.SUPABASE.ANON_KEY) {
+      throw new Error('Supabase configuration is missing');
     }
+    if (!window.supabase?.createClient) throw new Error('Supabase library not loaded');
+    this.client = window.supabase.createClient(CONFIG.SUPABASE.URL, CONFIG.SUPABASE.ANON_KEY);
+    this.initialized = true;
+    logger.info('Supabase client initialized');
+    return this.client;
   }
 
-  /**
-   * Execute query with retry logic
-   */
   async executeWithRetry(queryFn, maxAttempts = CONFIG.RETRY.MAX_ATTEMPTS) {
     let lastError;
-    
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-      try {
-        logger.debug(`Attempt ${attempt}/${maxAttempts}`);
-        return await queryFn();
-      } catch (error) {
+      try { return await queryFn(); }
+      catch (error) {
         lastError = error;
-        logger.warn(`Attempt ${attempt} failed`, error);
-
         if (attempt < maxAttempts) {
-          const delay = Math.min(
-            CONFIG.RETRY.INITIAL_DELAY * Math.pow(2, attempt - 1),
-            CONFIG.RETRY.MAX_DELAY
-          );
+          const delay = Math.min(CONFIG.RETRY.INITIAL_DELAY * 2 ** (attempt - 1), CONFIG.RETRY.MAX_DELAY);
           await new Promise(resolve => setTimeout(resolve, delay));
         }
       }
     }
-
-    logger.error(`All ${maxAttempts} attempts failed`, lastError);
     throw lastError;
   }
 
-  /**
-   * Fetch inventory products
-   */
   async getInventoryProducts() {
     return this.executeWithRetry(async () => {
-      const { data, error } = await this.client
-        .from(CONFIG.TABLES.INVENTORY_PRODUCTS)
-        .select('*')
-        .order('id', { ascending: true });
-
+      const { data, error } = await this.client.from(CONFIG.TABLES.INVENTORY_PRODUCTS).select('*').order('id');
       if (error) throw error;
       return data || [];
     });
   }
 
-  /**
-   * Fetch system items
-   */
   async getSystemItems() {
     return this.executeWithRetry(async () => {
-      const { data, error } = await this.client
-        .from(CONFIG.TABLES.SYSTEM_ITEMS)
-        .select('*');
-
+      const { data, error } = await this.client.from(CONFIG.TABLES.SYSTEM_ITEMS).select('*').order('id');
       if (error) throw error;
       return data || [];
     });
   }
 
-  /**
-   * Insert inventory product
-   */
   async insertProduct(product) {
     return this.executeWithRetry(async () => {
-      const { data, error } = await this.client
-        .from(CONFIG.TABLES.INVENTORY_PRODUCTS)
-        .insert([product])
-        .select();
-
+      const { data, error } = await this.client.from(CONFIG.TABLES.INVENTORY_PRODUCTS).insert(product).select().single();
       if (error) throw error;
-      return data?.[0];
+      return data;
     });
   }
 
-  /**
-   * Update inventory product
-   */
   async updateProduct(id, updates) {
     return this.executeWithRetry(async () => {
-      const { data, error } = await this.client
-        .from(CONFIG.TABLES.INVENTORY_PRODUCTS)
-        .update(updates)
-        .eq('id', id)
-        .select();
-
+      const { data, error } = await this.client.from(CONFIG.TABLES.INVENTORY_PRODUCTS).update(updates).eq('id', id).select().single();
       if (error) throw error;
-      return data?.[0];
+      return data;
     });
   }
 
-  /**
-   * Delete inventory product
-   */
   async deleteProduct(id) {
     return this.executeWithRetry(async () => {
-      const { error } = await this.client
-        .from(CONFIG.TABLES.INVENTORY_PRODUCTS)
-        .delete()
-        .eq('id', id);
-
+      const { error } = await this.client.from(CONFIG.TABLES.INVENTORY_PRODUCTS).delete().eq('id', id);
       if (error) throw error;
     });
   }
 
-  /**
-   * Insert system items (bulk)
-   */
-  async insertSystemItems(items) {
+  async deleteAllInventoryProducts() {
     return this.executeWithRetry(async () => {
-      const { data, error } = await this.client
-        .from(CONFIG.TABLES.SYSTEM_ITEMS)
-        .insert(items)
-        .select();
+      const { error } = await this.client.from(CONFIG.TABLES.INVENTORY_PRODUCTS).delete().not('id', 'is', null);
+      if (error) throw error;
+    });
+  }
 
+  async insertSystemItems(items) {
+    if (!Array.isArray(items) || !items.length) return [];
+    return this.executeWithRetry(async () => {
+      const { data, error } = await this.client.from(CONFIG.TABLES.SYSTEM_ITEMS).insert(items).select();
       if (error) throw error;
       return data || [];
     });
   }
 
-  /**
-   * Clear system items
-   */
   async deleteAllSystemItems() {
     return this.executeWithRetry(async () => {
-      const { error } = await this.client
-        .from(CONFIG.TABLES.SYSTEM_ITEMS)
-        .delete()
-        .neq('id', -1); // Delete all rows
-
+      const { error } = await this.client.from(CONFIG.TABLES.SYSTEM_ITEMS).delete().not('id', 'is', null);
       if (error) throw error;
     });
   }
 
-  /**
-   * Subscribe to realtime changes
-   */
   subscribeToChanges(table, callback) {
-    if (!this.client) {
-      logger.warn('Supabase client not initialized');
-      return null;
-    }
-
-    const subscription = this.client
-      .channel(`public:${table}`)
+    if (!this.client) return null;
+    const channel = this.client.channel(`public:${table}:${Date.now()}`)
       .on('postgres_changes', { event: '*', schema: 'public', table }, callback)
       .subscribe();
-
-    this.subscriptions.push(subscription);
-    logger.info(`Subscribed to ${table} changes`);
-    return subscription;
+    this.subscriptions.add(channel);
+    return channel;
   }
 
-  /**
-   * Unsubscribe from realtime changes
-   */
-  unsubscribe(subscription) {
-    if (!subscription) return;
-
-    this.client.removeChannel(subscription);
-    this.subscriptions = this.subscriptions.filter(s => s !== subscription);
-    logger.info('Unsubscribed from realtime changes');
+  unsubscribe(channel) {
+    if (!channel || !this.client) return;
+    this.client.removeChannel(channel);
+    this.subscriptions.delete(channel);
   }
 
-  /**
-   * Cleanup all subscriptions
-   */
   unsubscribeAll() {
-    this.subscriptions.forEach(sub => {
-      this.client.removeChannel(sub);
-    });
-    this.subscriptions = [];
-    logger.info('Unsubscribed from all realtime changes');
+    if (!this.client) return;
+    this.subscriptions.forEach(channel => this.client.removeChannel(channel));
+    this.subscriptions.clear();
   }
 
-  /**
-   * Check connection status
-   */
   async healthCheck() {
     try {
       await this.executeWithRetry(async () => {
-        const { data, error } = await this.client
-          .from(CONFIG.TABLES.SYSTEM_ITEMS)
-          .select('id')
-          .limit(1);
-
+        const { error } = await this.client.from(CONFIG.TABLES.SYSTEM_ITEMS).select('id').limit(1);
         if (error) throw error;
       }, 2);
       return true;
-    } catch (error) {
-      logger.warn('Health check failed', error);
-      return false;
-    }
+    } catch { return false; }
   }
 }
 
 export const supabaseClient = new SupabaseClientManager();
-
-// Initialize on module load
-supabaseClient.init().catch(error => {
-  logger.error('Failed to initialize Supabase', error);
-});
-
 export default SupabaseClientManager;
