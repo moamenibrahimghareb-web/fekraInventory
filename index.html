@@ -60,7 +60,7 @@
                                 <span id="cloud-status-text">متصل سحابياً</span>
                             </span>
                         </div>
-                        <p class="text-xs text-emerald-100 opacity-90 font-medium">مزامنة سحابية لحظية ومطابقة تامة مع شيتات السيستم</p>
+                        <p class="text-xs text-emerald-100 opacity-90 font-medium">مزامنة سحابية لحظية ومطابقة ذكية لشيتات السيستم</p>
                     </div>
                 </div>
 
@@ -116,6 +116,131 @@
             </div>
         </div>
 
+        <!-- 1. DYNAMIC ITEMS COLUMN MAPPING MODAL -->
+        <div id="items-mapping-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+            <div class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-7 shadow-2xl border border-slate-200 max-h-[90vh] overflow-y-auto">
+                <div class="flex items-center gap-3 mb-4 pb-3 border-b border-slate-100">
+                    <div class="bg-emerald-100 text-emerald-700 p-2.5 rounded-2xl text-2xl">📦</div>
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-800">تحديد أعمدة ملف الأصناف والمخزون</h3>
+                        <p class="text-xs text-slate-500" id="items-file-info-text">اختر العمود المقابل لكل بيان ليتم استيراده بدقة</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">عمود اسم الصنف <span class="text-rose-500">*</span></label>
+                        <select id="map-item-name" onchange="updateItemsPreview()" class="w-full text-xs font-bold p-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-emerald-500"></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">عمود كمية السيستم (الرصيد) <span class="text-rose-500">*</span></label>
+                        <select id="map-item-qty" onchange="updateItemsPreview()" class="w-full text-xs font-bold p-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-emerald-500"></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">عمود سعر البيع (السعر الافتراضي) <span class="text-emerald-600 font-bold">*</span></label>
+                        <select id="map-item-price" onchange="updateItemsPreview()" class="w-full text-xs font-bold p-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-emerald-500"></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">عمود الباركود (اختياري)</label>
+                        <select id="map-item-barcode" onchange="updateItemsPreview()" class="w-full text-xs font-bold p-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-emerald-500"></select>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-bold text-slate-700 mb-1">عمود التصنيف / الفئة (اختياري)</label>
+                        <select id="map-item-category" onchange="updateItemsPreview()" class="w-full text-xs font-bold p-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-emerald-500"></select>
+                    </div>
+                </div>
+
+                <!-- Live Preview Table -->
+                <div class="mb-5 bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
+                    <div class="text-xs font-bold text-slate-600 mb-2 flex items-center gap-1.5">
+                        <span>👁️</span>
+                        <span>معاينة حية للبيانات المستخرجة (أول 3 أصناف):</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-right text-xs">
+                            <thead>
+                                <tr class="text-slate-500 border-b border-slate-200">
+                                    <th class="py-1 px-2">اسم الصنف</th>
+                                    <th class="py-1 px-2 text-center">الكمية</th>
+                                    <th class="py-1 px-2 text-center">سعر البيع</th>
+                                    <th class="py-1 px-2">الباركود</th>
+                                    <th class="py-1 px-2">التصنيف</th>
+                                </tr>
+                            </thead>
+                            <tbody id="items-preview-body" class="divide-y divide-slate-100 font-bold text-slate-800"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="flex gap-3">
+                    <button onclick="executeItemsUpload()" class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/20 transition">تأكيد ورفع للسحابة</button>
+                    <button onclick="closeItemsMappingModal()" class="px-5 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition">إلغاء</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. DYNAMIC ACCOUNTS COLUMN MAPPING MODAL -->
+        <div id="accounts-mapping-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+            <div class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-7 shadow-2xl border border-slate-200 max-h-[90vh] overflow-y-auto">
+                <div class="flex items-center gap-3 mb-4 pb-3 border-b border-slate-100">
+                    <div class="bg-indigo-100 text-indigo-700 p-2.5 rounded-2xl text-2xl">💰</div>
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-800">تحديد أعمدة ملف الحسابات والديون</h3>
+                        <p class="text-xs text-slate-500" id="accounts-file-info-text">حدد الأعمدة لفرز اللي ليك واللي عليك تلقائياً</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-bold text-slate-700 mb-1">عمود اسم الحساب / العميل <span class="text-rose-500">*</span></label>
+                        <select id="map-acc-name" onchange="updateAccountsPreview()" class="w-full text-xs font-bold p-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500"></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-emerald-800 mb-1">🟢 عمود الرصيد (اللي ليا / مدين / عليه)</label>
+                        <select id="map-acc-madin" onchange="updateAccountsPreview()" class="w-full text-xs font-bold p-3 bg-emerald-50/50 border border-emerald-200 rounded-xl focus:border-emerald-500 text-emerald-900"></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-rose-800 mb-1">🔴 عمود الرصيد (اللي عليا / دائن / له)</label>
+                        <select id="map-acc-daen" onchange="updateAccountsPreview()" class="w-full text-xs font-bold p-3 bg-rose-50/50 border border-rose-200 rounded-xl focus:border-rose-500 text-rose-900"></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">عمود الهاتف / الموبايل (اختياري)</label>
+                        <select id="map-acc-phone" onchange="updateAccountsPreview()" class="w-full text-xs font-bold p-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500"></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">عمود الملاحظات / العنوان (اختياري)</label>
+                        <select id="map-acc-notes" onchange="updateAccountsPreview()" class="w-full text-xs font-bold p-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500"></select>
+                    </div>
+                </div>
+
+                <!-- Live Preview Table -->
+                <div class="mb-5 bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
+                    <div class="text-xs font-bold text-slate-600 mb-2 flex items-center gap-1.5">
+                        <span>👁️</span>
+                        <span>معاينة حية للبيانات المستخرجة (أول 3 حسابات):</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-right text-xs">
+                            <thead>
+                                <tr class="text-slate-500 border-b border-slate-200">
+                                    <th class="py-1 px-2">الاسم</th>
+                                    <th class="py-1 px-2 text-center">النوع</th>
+                                    <th class="py-1 px-2 text-left">المبلغ</th>
+                                    <th class="py-1 px-2">الهاتف والملاحظات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="accounts-preview-body" class="divide-y divide-slate-100 font-bold text-slate-800"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="flex gap-3">
+                    <button onclick="executeAccountsUpload()" class="flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-600/20 transition">تأكيد ورفع الحسابات للسحابة</button>
+                    <button onclick="closeAccountsMappingModal()" class="px-5 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition">إلغاء</button>
+                </div>
+            </div>
+        </div>
+
         <!-- SCREEN 1: COUNTING -->
         <div id="screen-1" class="space-y-5">
             <div class="bg-white rounded-3xl p-4 sm:p-5 shadow-sm border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -131,11 +256,11 @@
                 </div>
 
                 <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto shrink-0">
-                    <input type="file" id="system-file-input" accept=".csv, .xlsx, .xls" class="hidden" onchange="handleSystemFileUpload(event)">
+                    <input type="file" id="system-file-input" accept=".csv, .xlsx, .xls" class="hidden" onchange="handleSystemFileInput(event)">
                     <button type="button" onclick="document.getElementById('system-file-input').click()"
                         class="flex-1 sm:flex-none px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold rounded-xl transition flex items-center justify-center gap-2 shadow-md shadow-emerald-600/20">
                         <span>📤</span>
-                        <span>رفع شيت الأصناف (عرض اصناف.xlsx)</span>
+                        <span>رفع شيت الأصناف (Excel)</span>
                     </button>
                     <button id="clear-system-btn" type="button" onclick="confirmClearSystemData()" class="hidden px-3 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-xl text-xs font-bold transition" title="حذف بيانات السيستم السحابية">✕</button>
                 </div>
@@ -470,15 +595,15 @@
                             <span>💼</span>
                             <span>إضافة أو تعديل حساب (عميل / مورد)</span>
                         </h2>
-                        <p class="text-xs text-slate-500">تسجيل يدوي أو رفع شيت السيستم (حسبات.xlsx)</p>
+                        <p class="text-xs text-slate-500">تسجيل يدوي أو رفع شيت السيستم (Excel)</p>
                     </div>
 
                     <div class="flex items-center gap-2">
-                        <input type="file" id="accounts-file-input" accept=".csv, .xlsx, .xls" class="hidden" onchange="handleAccountsFileUpload(event)">
+                        <input type="file" id="accounts-file-input" accept=".csv, .xlsx, .xls" class="hidden" onchange="handleAccountsFileInput(event)">
                         <button type="button" onclick="document.getElementById('accounts-file-input').click()"
                             class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition flex items-center gap-2 shadow-sm">
                             <span>📤</span>
-                            <span>رفع شيت الحسابات (حسبات.xlsx)</span>
+                            <span>رفع شيت الحسابات (Excel)</span>
                         </button>
                     </div>
                 </div>
@@ -589,6 +714,12 @@
         let comparisonScope = 'partial';
         let accountFilter = 'all';
 
+        // Excel Mapping State
+        let pendingRawItems = [];
+        let pendingItemsStartRow = 0;
+        let pendingRawAccounts = [];
+        let pendingAccountsStartRow = 0;
+
         const dom = {
             productName: document.getElementById('product-name-input'),
             autocompleteList: document.getElementById('autocomplete-list'),
@@ -645,7 +776,24 @@
             toastBox: document.getElementById('toast-box'),
             toastMessage: document.getElementById('toast-message'),
             toastIcon: document.getElementById('toast-icon'),
-            // Customer Accounts DOM
+            // Mapping Modals
+            itemsMappingModal: document.getElementById('items-mapping-modal'),
+            itemsFileInfoText: document.getElementById('items-file-info-text'),
+            mapItemName: document.getElementById('map-item-name'),
+            mapItemQty: document.getElementById('map-item-qty'),
+            mapItemPrice: document.getElementById('map-item-price'),
+            mapItemBarcode: document.getElementById('map-item-barcode'),
+            mapItemCategory: document.getElementById('map-item-category'),
+            itemsPreviewBody: document.getElementById('items-preview-body'),
+            accountsMappingModal: document.getElementById('accounts-mapping-modal'),
+            accountsFileInfoText: document.getElementById('accounts-file-info-text'),
+            mapAccName: document.getElementById('map-acc-name'),
+            mapAccMadin: document.getElementById('map-acc-madin'),
+            mapAccDaen: document.getElementById('map-acc-daen'),
+            mapAccPhone: document.getElementById('map-acc-phone'),
+            mapAccNotes: document.getElementById('map-acc-notes'),
+            accountsPreviewBody: document.getElementById('accounts-preview-body'),
+            // Accounts DOM
             accKpiReceivable: document.getElementById('acc-kpi-receivable'),
             accKpiPayable: document.getElementById('acc-kpi-payable'),
             accKpiNet: document.getElementById('acc-kpi-net'),
@@ -1051,174 +1199,262 @@
             dom.savedProductsList.innerHTML = html;
         }
 
-        // --- System File Upload (عرض اصناف.xlsx) ---
-        function handleSystemFileUpload(event) {
+        // ========================================================
+        // 1. SMART DYNAMIC ITEMS UPLOADER (WITH MODAL & PREVIEW)
+        // ========================================================
+        function handleSystemFileInput(event) {
             const file = event.target.files[0];
             if (!file) return;
             const reader = new FileReader();
-            reader.onload = async function(e) {
-                try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array', cellDates: true });
-                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const rawRows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: "" });
-
-                    let headerRowIndex = 0;
-                    for (let i = 0; i < Math.min(rawRows.length, 12); i++) {
-                        const rowStr = (rawRows[i] || []).map(c => String(c)).join(" ");
-                        if (rowStr.includes("اسم الصنف") || rowStr.includes("إجمالى الكمية") || rowStr.includes("سعر البيع")) {
-                            headerRowIndex = i;
-                            break;
-                        }
-                    }
-
-                    const headerRow = rawRows[headerRowIndex] || [];
-                    let colName = 1, colQty = 2, colSellPrice = 4, colBarcode = 9, colCategory = 11;
-
-                    headerRow.forEach((h, cIdx) => {
-                        const val = String(h).trim();
-                        if (val === "اسم الصنف" || (val.includes("اسم") && val.includes("الصنف"))) colName = cIdx;
-                        else if (val === "إجمالى الكمية" || val === "اجمالي الكمية" || val === "الكمية") colQty = cIdx;
-                        else if (val === "سعر البيع") colSellPrice = cIdx;
-                        else if (val.includes("باركود")) colBarcode = cIdx;
-                        else if (val.includes("التصنيف")) colCategory = cIdx;
-                    });
-
-                    const map = new Map();
-                    for (let i = headerRowIndex + 1; i < rawRows.length; i++) {
-                        const row = rawRows[i];
-                        if (!row || row.length === 0) continue;
-                        const rawName = String(row[colName] || '').trim();
-                        if (!rawName || rawName === 'الإجمالى' || rawName === 'الاجمالي' || rawName === 'المجموع' || rawName.toLowerCase() === 'nan') continue;
-
-                        const rawQty = parseFloat(row[colQty]);
-                        const qty = isNaN(rawQty) ? 0 : rawQty;
-                        const rawPrice = parseFloat(row[colSellPrice]);
-                        const price = isNaN(rawPrice) ? 0 : rawPrice;
-                        const barcode = String(row[colBarcode] || '').trim();
-                        const category = String(row[colCategory] || 'عام').trim();
-                        const norm = normalizeName(rawName);
-
-                        if (map.has(norm)) {
-                            const existing = map.get(norm);
-                            existing.system_qty += qty;
-                            if (price > 0 && existing.unit_price === 0) existing.unit_price = price;
-                            if (barcode && !existing.barcode) existing.barcode = barcode;
-                        } else {
-                            map.set(norm, {
-                                name: rawName,
-                                normalized_name: norm,
-                                system_qty: qty,
-                                unit_price: price,
-                                barcode: barcode,
-                                category: category || 'عام',
-                                updated_at: new Date().toISOString()
-                            });
-                        }
-                    }
-
-                    const rowsToUpsert = Array.from(map.values());
-                    if (rowsToUpsert.length === 0) return showToast("لم يتم العثور على أصناف صالحة", "⚠️");
-
-                    showToast(`جاري رفع ${rowsToUpsert.length} صنف للسحابة...`, "⏳");
-
-                    await supabaseClient.from('system_items').delete().neq('id', 0);
-
-                    const chunkSize = 300;
-                    for (let i = 0; i < rowsToUpsert.length; i += chunkSize) {
-                        const chunk = rowsToUpsert.slice(i, i + chunkSize);
-                        const { error } = await supabaseClient.from('system_items').insert(chunk);
-                        if (error) throw error;
-                    }
-
-                    await fetchOnlineData(false);
-                    showToast(`تم رفع ${systemItems.length} صنف بسعر البيع بنجاح!`, "🎉");
-                } catch (err) {
-                    showToast(`خطأ أثناء الرفع: ${err.message}`, "❌");
-                }
-            };
-            reader.readAsArrayBuffer(file);
-            event.target.value = '';
-        }
-
-        // --- Customer Accounts Upload (حسبات.xlsx) ---
-        function handleAccountsFileUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = async function(e) {
+            reader.onload = function(e) {
                 try {
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, { type: 'array' });
                     const worksheet = workbook.Sheets[workbook.SheetNames[0]];
                     const rawRows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: "" });
 
-                    let headerRowIndex = 0;
-                    for (let i = 0; i < Math.min(rawRows.length, 10); i++) {
-                        const rowStr = (rawRows[i] || []).map(c => String(c)).join(" ");
-                        if (rowStr.includes("اسم الحساب") || rowStr.includes("رقم الحساب")) {
-                            headerRowIndex = i;
-                            break;
-                        }
+                    if (rawRows.length === 0) return showToast("الملف فارغ", "⚠️");
+
+                    // Smart detection of header row
+                    let headerIdx = 0, bestScore = -1;
+                    const keywords = ['اسم الصنف', 'إجمالى الكمية', 'سعر البيع', 'باركود', 'التصنيف', 'الكمية', 'سعر'];
+                    
+                    for (let i = 0; i < Math.min(rawRows.length, 12); i++) {
+                        const rowStr = (rawRows[i] || []).join(" ");
+                        let score = 0;
+                        keywords.forEach(k => { if (rowStr.includes(k)) score += 2; });
+                        let nonEmpties = (rawRows[i] || []).filter(c => String(c).trim() !== "").length;
+                        let total = score * 5 + nonEmpties;
+                        if (total > bestScore && score > 0) { bestScore = total; headerIdx = i; }
                     }
 
-                    let colName = 2, colMadin = 3, colDaen = 4, colNature = 7, colPhone = 10, colAddress = 11;
+                    // Build column labels (including subheaders if any)
+                    const headerRow = rawRows[headerIdx] || [];
+                    const subRow = rawRows[headerIdx + 1] || [];
+                    let hasSub = subRow.some(c => ['سعر', 'كمية', 'كود'].some(k => String(c).includes(k)));
 
-                    for (let cIdx = 0; cIdx < 20; cIdx++) {
-                        let combined = "";
-                        for (let r = headerRowIndex; r <= headerRowIndex + 1 && r < rawRows.length; r++) {
-                            if (rawRows[r] && rawRows[r][cIdx]) combined += " " + String(rawRows[r][cIdx]);
-                        }
-                        if (combined.includes("اسم الحساب")) colName = cIdx;
-                        else if ((combined.includes("مدين") || combined.includes("عليه")) && !combined.includes("شيكات")) colMadin = cIdx;
-                        else if ((combined.includes("دائن") || combined.includes("له")) && !combined.includes("شيكات")) colDaen = cIdx;
-                        else if (combined.includes("طبيعة")) colNature = cIdx;
-                        else if (combined.includes("موبايل") || combined.includes("هاتف")) colPhone = cIdx;
-                        else if (combined.includes("عنوان")) colAddress = cIdx;
+                    const columns = [];
+                    for (let c = 0; c < headerRow.length; c++) {
+                        let main = String(headerRow[c] || '').trim();
+                        let sub = (hasSub && subRow[c]) ? String(subRow[c]).trim() : '';
+                        let label = (main && sub && main !== sub) ? `${main} (${sub})` : (main || sub || `عمود ${c + 1}`);
+                        columns.push({ index: c, label: label, main: main, sub: sub });
                     }
 
-                    let startRow = headerRowIndex + 1;
-                    if (rawRows[startRow] && (rawRows[startRow].join(" ").includes("مدين") || rawRows[startRow].join(" ").includes("دائن"))) {
-                        startRow++;
+                    pendingRawItems = rawRows;
+                    pendingItemsStartRow = hasSub ? headerIdx + 2 : headerIdx + 1;
+
+                    // Populate Select Options
+                    const createOpts = (selectedIdx, allowNone = false) => {
+                        let html = allowNone ? '<option value="-1">-- بدون (غير محدد) --</option>' : '';
+                        columns.forEach(col => {
+                            html += `<option value="${col.index}" ${col.index === selectedIdx ? 'selected' : ''}>${escapeHtml(col.label)}</option>`;
+                        });
+                        return html;
+                    };
+
+                    // Smart Defaults
+                    let defName = columns.findIndex(c => c.label.includes('اسم الصنف') || c.label.includes('الصنف'));
+                    let defQty = columns.findIndex(c => c.label.includes('إجمالى الكمية') || c.label.includes('اجمالي الكمية') || c.label.includes('الكمية') || c.label.includes('الرصيد'));
+                    let defPrice = columns.findIndex(c => c.main === 'سعر البيع' || (c.label.includes('سعر البيع') && !c.label.includes('الوسط')));
+                    let defBarcode = columns.findIndex(c => c.label.includes('باركود'));
+                    let defCategory = columns.findIndex(c => c.label.includes('التصنيف') || c.label.includes('فئة'));
+
+                    if (defName === -1) defName = 1;
+                    if (defQty === -1) defQty = 2;
+                    if (defPrice === -1) defPrice = 4;
+                    if (defBarcode === -1) defBarcode = 9;
+                    if (defCategory === -1) defCategory = 11;
+
+                    dom.mapItemName.innerHTML = createOpts(defName);
+                    dom.mapItemQty.innerHTML = createOpts(defQty);
+                    dom.mapItemPrice.innerHTML = createOpts(defPrice, true);
+                    dom.mapItemBarcode.innerHTML = createOpts(defBarcode, true);
+                    dom.mapItemCategory.innerHTML = createOpts(defCategory, true);
+
+                    dom.itemsFileInfoText.innerText = `تم اكتشاف ${rawRows.length - pendingItemsStartRow} صنف داخل الملف. راجع تطابق الأعمدة أدناه:`;
+                    updateItemsPreview();
+                    dom.itemsMappingModal.classList.remove('hidden');
+
+                } catch (err) {
+                    showToast(`خطأ في قراءة ملف الأصناف: ${err.message}`, "❌");
+                }
+            };
+            reader.readAsArrayBuffer(file);
+            event.target.value = '';
+        }
+
+        function updateItemsPreview() {
+            const nameIdx = parseInt(dom.mapItemName.value);
+            const qtyIdx = parseInt(dom.mapItemQty.value);
+            const priceIdx = parseInt(dom.mapItemPrice.value);
+            const barIdx = parseInt(dom.mapItemBarcode.value);
+            const catIdx = parseInt(dom.mapItemCategory.value);
+
+            let html = '';
+            let count = 0;
+            for (let i = pendingItemsStartRow; i < pendingRawItems.length && count < 3; i++) {
+                const r = pendingRawItems[i];
+                if (!r || r.length <= nameIdx) continue;
+                const name = String(r[nameIdx] || '').trim();
+                if (!name || name === 'الإجمالى' || name === 'الاجمالي' || name === 'المجموع') continue;
+
+                const qty = parseFloat(r[qtyIdx]) || 0;
+                const price = (priceIdx !== -1) ? (parseFloat(r[priceIdx]) || 0) : 0;
+                const bar = (barIdx !== -1) ? String(r[barIdx] || '') : '-';
+                const cat = (catIdx !== -1) ? String(r[catIdx] || 'عام') : 'عام';
+
+                html += `
+                    <tr>
+                        <td class="py-1.5 px-2 text-emerald-800">${escapeHtml(name)}</td>
+                        <td class="py-1.5 px-2 text-center text-slate-700">${formatNumber(qty)}</td>
+                        <td class="py-1.5 px-2 text-center text-emerald-700">${formatCurrency(price)}</td>
+                        <td class="py-1.5 px-2 font-mono text-slate-500">${escapeHtml(bar)}</td>
+                        <td class="py-1.5 px-2 text-slate-600">${escapeHtml(cat)}</td>
+                    </tr>`;
+                count++;
+            }
+            dom.itemsPreviewBody.innerHTML = html || '<tr><td colspan="5" class="py-2 text-center text-slate-400">لا توجد بيانات صالحة للعرض</td></tr>';
+        }
+
+        function closeItemsMappingModal() { dom.itemsMappingModal.classList.add('hidden'); }
+
+        async function executeItemsUpload() {
+            const nameIdx = parseInt(dom.mapItemName.value);
+            const qtyIdx = parseInt(dom.mapItemQty.value);
+            const priceIdx = parseInt(dom.mapItemPrice.value);
+            const barIdx = parseInt(dom.mapItemBarcode.value);
+            const catIdx = parseInt(dom.mapItemCategory.value);
+
+            if (nameIdx === -1 || qtyIdx === -1) return showToast("يرجى اختيار عمود الاسم وعمود الكمية على الأقل", "⚠️");
+
+            const map = new Map();
+            for (let i = pendingItemsStartRow; i < pendingRawItems.length; i++) {
+                const r = pendingRawItems[i];
+                if (!r || r.length <= nameIdx) continue;
+                const rawName = String(r[nameIdx] || '').trim();
+                if (!rawName || rawName === 'الإجمالى' || rawName === 'الاجمالي' || rawName === 'المجموع') continue;
+
+                const qty = parseFloat(r[qtyIdx]) || 0;
+                const price = (priceIdx !== -1) ? (parseFloat(r[priceIdx]) || 0) : 0;
+                const bar = (barIdx !== -1) ? String(r[barIdx] || '').trim() : '';
+                const cat = (catIdx !== -1) ? String(r[catIdx] || 'عام').trim() : 'عام';
+                const norm = normalizeName(rawName);
+
+                if (map.has(norm)) {
+                    const existing = map.get(norm);
+                    existing.system_qty += qty;
+                    if (price > 0 && existing.unit_price === 0) existing.unit_price = price;
+                    if (bar && !existing.barcode) existing.barcode = bar;
+                } else {
+                    map.set(norm, {
+                        name: rawName,
+                        normalized_name: norm,
+                        system_qty: qty,
+                        unit_price: price,
+                        barcode: bar,
+                        category: cat || 'عام',
+                        updated_at: new Date().toISOString()
+                    });
+                }
+            }
+
+            const itemsToInsert = Array.from(map.values());
+            if (itemsToInsert.length === 0) return showToast("لم يتم العثور على أصناف صالحة للرفع", "⚠️");
+
+            closeItemsMappingModal();
+            showToast(`جاري رفع ${itemsToInsert.length} صنف للسحابة...`, "⏳");
+
+            try {
+                await supabaseClient.from('system_items').delete().neq('id', 0);
+
+                const chunkSize = 300;
+                for (let i = 0; i < itemsToInsert.length; i += chunkSize) {
+                    const chunk = itemsToInsert.slice(i, i + chunkSize);
+                    const { error } = await supabaseClient.from('system_items').insert(chunk);
+                    if (error) throw error;
+                }
+
+                await fetchOnlineData(false);
+                showToast(`تم رفع ${systemItems.length} صنف بسعر البيع بنجاح!`, "🎉");
+            } catch (err) {
+                showToast(`خطأ أثناء الرفع: ${err.message}`, "❌");
+            }
+        }
+
+        // ========================================================
+        // 2. SMART DYNAMIC ACCOUNTS UPLOADER (WITH MODAL & PREVIEW)
+        // ========================================================
+        function handleAccountsFileInput(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const rawRows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: "" });
+
+                    if (rawRows.length === 0) return showToast("الملف فارغ", "⚠️");
+
+                    let headerIdx = 0, bestScore = -1;
+                    const keywords = ['اسم الحساب', 'رقم الحساب', 'الرصيد الحالى', 'مدين', 'دائن', 'موبايل', 'عنوان'];
+
+                    for (let i = 0; i < Math.min(rawRows.length, 12); i++) {
+                        const rowStr = (rawRows[i] || []).join(" ");
+                        let score = 0;
+                        keywords.forEach(k => { if (rowStr.includes(k)) score += 2; });
+                        let nonEmpties = (rawRows[i] || []).filter(c => String(c).trim() !== "").length;
+                        let total = score * 5 + nonEmpties;
+                        if (total > bestScore && score > 0) { bestScore = total; headerIdx = i; }
                     }
 
-                    const rowsToInsert = [];
-                    for (let i = startRow; i < rawRows.length; i++) {
-                        const row = rawRows[i];
-                        if (!row || row.length <= colName) continue;
-                        const name = String(row[colName] || '').trim();
-                        if (!name || name === 'الإجمالى' || name === 'الاجمالي' || name === 'المجموع' || name.toLowerCase() === 'nan') continue;
+                    const headerRow = rawRows[headerIdx] || [];
+                    const subRow = rawRows[headerIdx + 1] || [];
+                    let hasSub = subRow.some(c => ['مدين', 'دائن', 'موبايل', 'عنوان'].some(k => String(c).includes(k)));
 
-                        const madin = parseFloat(row[colMadin]) || 0;
-                        const daen = parseFloat(row[colDaen]) || 0;
-                        const nature = String(row[colNature] || 'عميل').trim();
-                        const phone = String(row[colPhone] || '').trim();
-                        const address = String(row[colAddress] || '').trim();
-
-                        if (madin > 0) {
-                            rowsToInsert.push({ name, type: 'receivable', amount: madin, is_included: true, phone, notes: address });
-                        } else if (daen > 0) {
-                            rowsToInsert.push({ name, type: 'payable', amount: daen, is_included: true, phone, notes: address });
-                        } else {
-                            rowsToInsert.push({ name, type: (nature === 'مورد' ? 'payable' : 'receivable'), amount: 0, is_included: true, phone, notes: address });
-                        }
+                    const columns = [];
+                    for (let c = 0; c < headerRow.length; c++) {
+                        let main = String(headerRow[c] || '').trim();
+                        let sub = (hasSub && subRow[c]) ? String(subRow[c]).trim() : '';
+                        let label = (main && sub && main !== sub) ? `${main} (${sub})` : (main || sub || `عمود ${c + 1}`);
+                        columns.push({ index: c, label: label, main: main, sub: sub });
                     }
 
-                    if (rowsToInsert.length === 0) return showToast("لم يتم العثور على حسابات صالحة للرفع", "⚠️");
+                    pendingRawAccounts = rawRows;
+                    pendingAccountsStartRow = hasSub ? headerIdx + 2 : headerIdx + 1;
 
-                    showToast(`جاري رفع ${rowsToInsert.length} حساب...`, "⏳");
+                    const createOpts = (selectedIdx, allowNone = false) => {
+                        let html = allowNone ? '<option value="-1">-- بدون (غير محدد) --</option>' : '';
+                        columns.forEach(col => {
+                            html += `<option value="${col.index}" ${col.index === selectedIdx ? 'selected' : ''}>${escapeHtml(col.label)}</option>`;
+                        });
+                        return html;
+                    };
 
-                    await supabaseClient.from('customer_accounts').delete().neq('id', 0);
+                    let defName = columns.findIndex(c => c.label.includes('اسم الحساب') || c.label.includes('الاسم') || c.label.includes('العميل'));
+                    let defMadin = columns.findIndex(c => (c.label.includes('مدين') || c.label.includes('عليه')) && !c.label.includes('شيكات'));
+                    let defDaen = columns.findIndex(c => (c.label.includes('دائن') || c.label.includes('له')) && !c.label.includes('شيكات'));
+                    let defPhone = columns.findIndex(c => c.label.includes('موبايل') || c.label.includes('هاتف'));
+                    let defNotes = columns.findIndex(c => c.label.includes('عنوان') || c.label.includes('ملاحظات'));
 
-                    const chunkSize = 300;
-                    for (let i = 0; i < rowsToInsert.length; i += chunkSize) {
-                        const chunk = rowsToInsert.slice(i, i + chunkSize);
-                        const { error } = await supabaseClient.from('customer_accounts').insert(chunk);
-                        if (error) throw error;
-                    }
+                    if (defName === -1) defName = 2;
+                    if (defMadin === -1) defMadin = 3;
+                    if (defDaen === -1) defDaen = 4;
+                    if (defPhone === -1) defPhone = 10;
+                    if (defNotes === -1) defNotes = 11;
 
-                    await fetchOnlineData(false);
-                    showToast(`تم رفع ${customerAccounts.length} حساب بنجاح!`, "🎉");
+                    dom.mapAccName.innerHTML = createOpts(defName);
+                    dom.mapAccMadin.innerHTML = createOpts(defMadin, true);
+                    dom.mapAccDaen.innerHTML = createOpts(defDaen, true);
+                    dom.mapAccPhone.innerHTML = createOpts(defPhone, true);
+                    dom.mapAccNotes.innerHTML = createOpts(defNotes, true);
+
+                    dom.accountsFileInfoText.innerText = `تم اكتشاف ${rawRows.length - pendingAccountsStartRow} حساب داخل الملف. راجع تطابق الأعمدة أدناه:`;
+                    updateAccountsPreview();
+                    dom.accountsMappingModal.classList.remove('hidden');
+
                 } catch (err) {
                     showToast(`خطأ في قراءة ملف الحسابات: ${err.message}`, "❌");
                 }
@@ -1227,6 +1463,96 @@
             event.target.value = '';
         }
 
+        function updateAccountsPreview() {
+            const nameIdx = parseInt(dom.mapAccName.value);
+            const madinIdx = parseInt(dom.mapAccMadin.value);
+            const daenIdx = parseInt(dom.mapAccDaen.value);
+            const phoneIdx = parseInt(dom.mapAccPhone.value);
+            const notesIdx = parseInt(dom.mapAccNotes.value);
+
+            let html = '';
+            let count = 0;
+            for (let i = pendingAccountsStartRow; i < pendingRawAccounts.length && count < 3; i++) {
+                const r = pendingRawAccounts[i];
+                if (!r || r.length <= nameIdx) continue;
+                const name = String(r[nameIdx] || '').trim();
+                if (!name || name === 'الإجمالى' || name === 'الاجمالي' || name === 'المجموع') continue;
+
+                const madin = (madinIdx !== -1) ? (parseFloat(r[madinIdx]) || 0) : 0;
+                const daen = (daenIdx !== -1) ? (parseFloat(r[daenIdx]) || 0) : 0;
+                const phone = (phoneIdx !== -1) ? String(r[phoneIdx] || '') : '';
+                const notes = (notesIdx !== -1) ? String(r[notesIdx] || '') : '';
+
+                let typeStr = '🟢 ليا', amount = madin, badgeClass = 'text-emerald-700 bg-emerald-50';
+                if (daen > 0) { typeStr = '🔴 عليا'; amount = daen; badgeClass = 'text-rose-700 bg-rose-50'; }
+
+                html += `
+                    <tr>
+                        <td class="py-1.5 px-2 text-slate-900">${escapeHtml(name)}</td>
+                        <td class="py-1.5 px-2 text-center"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${badgeClass}">${typeStr}</span></td>
+                        <td class="py-1.5 px-2 text-left font-mono font-black">${formatCurrency(amount)}</td>
+                        <td class="py-1.5 px-2 text-slate-500">${escapeHtml(phone)} ${escapeHtml(notes)}</td>
+                    </tr>`;
+                count++;
+            }
+            dom.accountsPreviewBody.innerHTML = html || '<tr><td colspan="4" class="py-2 text-center text-slate-400">لا توجد بيانات صالحة للعرض</td></tr>';
+        }
+
+        function closeAccountsMappingModal() { dom.accountsMappingModal.classList.add('hidden'); }
+
+        async function executeAccountsUpload() {
+            const nameIdx = parseInt(dom.mapAccName.value);
+            const madinIdx = parseInt(dom.mapAccMadin.value);
+            const daenIdx = parseInt(dom.mapAccDaen.value);
+            const phoneIdx = parseInt(dom.mapAccPhone.value);
+            const notesIdx = parseInt(dom.mapAccNotes.value);
+
+            if (nameIdx === -1) return showToast("يرجى اختيار عمود اسم الحساب / العميل", "⚠️");
+
+            const rowsToInsert = [];
+            for (let i = pendingAccountsStartRow; i < pendingRawAccounts.length; i++) {
+                const r = pendingRawAccounts[i];
+                if (!r || r.length <= nameIdx) continue;
+                const name = String(r[nameIdx] || '').trim();
+                if (!name || name === 'الإجمالى' || name === 'الاجمالي' || name === 'المجموع') continue;
+
+                const madin = (madinIdx !== -1) ? (parseFloat(r[madinIdx]) || 0) : 0;
+                const daen = (daenIdx !== -1) ? (parseFloat(r[daenIdx]) || 0) : 0;
+                const phone = (phoneIdx !== -1) ? String(r[phoneIdx] || '').trim() : '';
+                const notes = (notesIdx !== -1) ? String(r[notesIdx] || '').trim() : '';
+
+                if (madin > 0) {
+                    rowsToInsert.push({ name, type: 'receivable', amount: madin, is_included: true, phone, notes });
+                } else if (daen > 0) {
+                    rowsToInsert.push({ name, type: 'payable', amount: daen, is_included: true, phone, notes });
+                } else {
+                    rowsToInsert.push({ name, type: 'receivable', amount: 0, is_included: true, phone, notes });
+                }
+            }
+
+            if (rowsToInsert.length === 0) return showToast("لم يتم العثور على حسابات صالحة للرفع", "⚠️");
+
+            closeAccountsMappingModal();
+            showToast(`جاري رفع ${rowsToInsert.length} حساب...`, "⏳");
+
+            try {
+                await supabaseClient.from('customer_accounts').delete().neq('id', 0);
+
+                const chunkSize = 300;
+                for (let i = 0; i < rowsToInsert.length; i += chunkSize) {
+                    const chunk = rowsToInsert.slice(i, i + chunkSize);
+                    const { error } = await supabaseClient.from('customer_accounts').insert(chunk);
+                    if (error) throw error;
+                }
+
+                await fetchOnlineData(false);
+                showToast(`تم رفع ${customerAccounts.length} حساب بنجاح!`, "🎉");
+            } catch (err) {
+                showToast(`خطأ أثناء الرفع: ${err.message}`, "❌");
+            }
+        }
+
+        // --- System File Status & Clear ---
         function updateSystemFileHeaderStatus() {
             if (systemItems.length > 0) {
                 dom.systemFileStatus.innerText = `سحابي (${systemItems.length} صنف)`;
